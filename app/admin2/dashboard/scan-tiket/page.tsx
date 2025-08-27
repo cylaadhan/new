@@ -1,19 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Sidebar2 from "../../../../components/Sidebar2";
 import { FaQrcode, FaCamera, FaUpload, FaArrowLeft } from "react-icons/fa";
+import Webcam from "react-webcam";
 
 export default function ScanTiketPage() {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const webcamRef = useRef<Webcam>(null);
+  
+  // Konfigurasi kamera
+  const videoConstraints = {
+    width: 720,
+    height: 720,
+    facingMode: "environment" // Gunakan kamera belakang untuk scan QR
+  };
   
   // Fungsi untuk meminta izin kamera
   const requestCameraPermission = () => {
-    // Dalam implementasi nyata, ini akan menggunakan API browser untuk meminta izin kamera
-    // dan menginisialisasi pemindaian QR code
     setIsCameraActive(true);
-    alert("Meminta izin kamera...");
   };
+  
+  // Fungsi untuk menangkap gambar dari kamera
+  const captureImage = useCallback(() => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        // Di sini Anda bisa menambahkan logika untuk memproses QR code
+        // Misalnya menggunakan library seperti jsQR
+        setScanResult("Berhasil mengambil gambar, memproses QR code...");
+        // Simulasi hasil scan
+        setTimeout(() => {
+          setScanResult("Tiket #EB-1234 terverifikasi");
+        }, 1000);
+      }
+    }
+  }, [webcamRef]);
   
   // Fungsi untuk menangani pemindaian file gambar
   const handleImageScan = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,12 +74,23 @@ export default function ScanTiketPage() {
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
           <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
             {isCameraActive ? (
-              <div className="w-full max-w-md aspect-square bg-gray-100 flex items-center justify-center rounded-lg mb-4">
-                {/* Area kamera akan ditampilkan di sini */}
-                <div className="text-gray-500 text-center">
-                  <FaCamera className="text-5xl mx-auto mb-2" />
-                  <p>Kamera aktif. Arahkan ke QR code tiket.</p>
-                </div>
+              <div className="w-full max-w-md aspect-square bg-gray-100 flex flex-col items-center justify-center rounded-lg mb-4">
+                {/* Area kamera */}
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  videoConstraints={videoConstraints}
+                  className="rounded-lg"
+                  mirrored={false}
+                  style={{ width: '100%', height: 'auto' }}
+                />
+                <button 
+                  onClick={captureImage}
+                  className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition"
+                >
+                  Ambil Gambar
+                </button>
               </div>
             ) : (
               <div className="text-center mb-6">
@@ -68,7 +101,7 @@ export default function ScanTiketPage() {
                   onClick={requestCameraPermission}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition mb-4 w-full max-w-xs"
                 >
-                  Request Camera Permissions
+                  Aktifkan Kamera
                 </button>
                 
                 <div className="flex items-center justify-center my-4">

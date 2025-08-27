@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { FaPlus, FaCog, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
+import { Settings } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 
 const data = [
@@ -10,42 +11,76 @@ const data = [
 
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
+  const [editData, setEditData] = useState<any>(null);
+
+  const handleEdit = (row: any) => {
+    setEditData(row);
+    setShowModal(true);
+  };
+
+  // Fungsi untuk mendapatkan kelas warna berdasarkan tipe tiket
+  const getTipeClass = (tipe: string) => {
+    switch (tipe) {
+      case "Early Bird":
+        return "bg-green-100 text-green-800";
+      case "Presale 1":
+        return "bg-blue-100 text-blue-800";
+      case "Presale 2":
+        return "bg-purple-100 text-purple-800";
+      case "Presale 3":
+        return "bg-indigo-100 text-indigo-800";
+      case "VIP":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 font-sans">
       <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8 bg-gray-50">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Setup Periode Sale</h1>
-        <div className="bg-white rounded-xl shadow p-6">
-          <button className="mb-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded">
-            <FaPlus />
-            Tambah Periode Sale
+      <main className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Setup Periode Sale</h1>
+          </div>
+        </div>
+
+        {/* Kotak untuk Tabel */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <button className="mb-4 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
+            <FaPlus className="h-4 w-4" />
+            <span>Tambah</span>
           </button>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-200 rounded-lg">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">No.</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Nama Periode</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Tanggal Mulai</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Tanggal Selesai</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-center font-bold text-gray-800">Aksi</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AWAL</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AKHIR</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr key={row.no} className="even:bg-gray-50 hover:bg-blue-50 transition">
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.no}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.nama}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.mulai}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.selesai}</td>
-                    <td className="border-b border-gray-200 px-4 py-2">
-                      <div className="flex justify-center">
-                        <button
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded shadow flex items-center gap-1 transition"
-                          onClick={() => setShowModal(true)}
+                  <tr key={row.no} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="p-4 text-sm text-gray-900">{row.no}</td>
+                    <td className="p-4">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
+                        {row.nama}
+                      </span>
+                    </td>
+                    <td className="p-4 text-sm text-gray-900">{row.mulai}</td>
+                    <td className="p-4 text-sm text-gray-900">{row.selesai}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <button 
+                          className="text-blue-800 hover:text-black transition-colors duration-200"
+                          onClick={() => handleEdit(row)}
                         >
-                          <FaCog /> Setup Periode Sale
+                          <Settings className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -55,7 +90,7 @@ export default function Page() {
             </table>
           </div>
         </div>
-        {/* Modal Pop Up */}
+        {/* Modal Edit Pop Up */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
@@ -102,4 +137,4 @@ export default function Page() {
       </main>
     </div>
   );
-} 
+}

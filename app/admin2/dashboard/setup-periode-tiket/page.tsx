@@ -1,14 +1,14 @@
 "use client";
 import { useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaSave } from "react-icons/fa";
+import { FaPlus, FaTimes, FaSave, FaCog } from "react-icons/fa";
 import Sidebar2 from "../../../../components/Sidebar2";
 
 const data = [
-  { no: 1, kode: "EB", nama: "Early Bird SOERATS 2025", periodeAwal: "15-03-2025", periodeAkhir: "16-04-2025" },
-  { no: 2, kode: "P1", nama: "Presale 1 SOERATS 2025", periodeAwal: "17-05-2025", periodeAkhir: "17-06-2025" },
-  { no: 3, kode: "PS2 (COUPLE)", nama: "PAKET COUPLE", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
-  { no: 4, kode: "PS2 (TIGA)", nama: "PAKET BERTIGA", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
-  { no: 5, kode: "PS2 (EMPAT)", nama: "PAKET BER-EMPAT", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
+  { kode: "EB", nama: "Early Bird", periodeAwal: "15-03-2025", periodeAkhir: "16-04-2025" },
+  { kode: "P1", nama: "Presale 1", periodeAwal: "17-05-2025", periodeAkhir: "17-06-2025" },
+  { kode: "P2", nama: "Presale 2", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
+  { kode: "P3", nama: "Presale 3", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
+  { kode: "VIP", nama: "VIP", periodeAwal: "23-07-2025", periodeAkhir: "02-08-2025" },
 ];
 
 export default function Page() {
@@ -20,43 +20,69 @@ export default function Page() {
     setShowModal(true);
   };
 
+  // Fungsi untuk mendapatkan kelas warna berdasarkan tipe tiket
+  const getTipeClass = (tipe: string) => {
+    switch (tipe) {
+      case "Early Bird":
+        return "bg-green-100 text-green-800";
+      case "Presale 1":
+        return "bg-blue-100 text-blue-800";
+      case "Presale 2":
+        return "bg-purple-100 text-purple-800";
+      case "Presale 3":
+        return "bg-indigo-100 text-indigo-800";
+      case "VIP":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 font-sans">
       <Sidebar2 adminName="Panitia" />
-      <main className="flex-1 p-8 bg-gray-50">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Setup Periode Sale</h1>
-        <div className="bg-white rounded-xl shadow p-6">
-          <button className="mb-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded shadow transition">
-            <FaPlus />
-            Tambah Setup Periode Sale
+      <main className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Setup Periode Sale</h1>
+          </div>
+        </div>
+
+        {/* Kotak untuk Tabel */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <button className="mb-4 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
+            <FaPlus className="h-4 w-4" />
+            <span>Tambah</span>
           </button>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-200 rounded-lg">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border-b border-gray-200 px-4 py-3 text-left font-bold text-gray-800">No.</th>
-                  <th className="border-b border-gray-200 px-4 py-3 text-left font-bold text-gray-800">Kode</th>
-                  <th className="border-b border-gray-200 px-4 py-3 text-left font-bold text-gray-800">Nama</th>
-                  <th className="border-b border-gray-200 px-4 py-3 text-left font-bold text-gray-800">Periode Awal</th>
-                  <th className="border-b border-gray-200 px-4 py-3 text-left font-bold text-gray-800">Periode Akhir</th>
-                  <th className="border-b border-gray-200 px-4 py-3 text-center font-bold text-gray-800">Aksi</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AWAL</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AKHIR</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr key={row.no} className="even:bg-gray-50 hover:bg-blue-50 transition">
-                    <td className="border-b border-gray-200 px-4 py-3 text-gray-800">{row.no}</td>
-                    <td className="border-b border-gray-200 px-4 py-3 text-gray-800">{row.kode}</td>
-                    <td className="border-b border-gray-200 px-4 py-3 text-gray-800">{row.nama}</td>
-                    <td className="border-b border-gray-200 px-4 py-3 text-gray-800">{row.periodeAwal}</td>
-                    <td className="border-b border-gray-200 px-4 py-3 text-gray-800">{row.periodeAkhir}</td>
-                    <td className="border-b border-gray-200 px-4 py-3 text-center">
-                      <div className="flex justify-center">
+                  <tr key={row.kode} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="p-4 text-sm text-gray-900">{row.kode}</td>
+                    <td className="p-4">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
+                        {row.nama}
+                      </span>
+                    </td>
+                    <td className="p-4 text-sm text-gray-900">{row.periodeAwal}</td>
+                    <td className="p-4 text-sm text-gray-900">{row.periodeAkhir}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
                         <button 
-                          className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-3 py-1 rounded shadow transition"
+                          className="text-blue-800 hover:text-black transition-colors duration-200"
                           onClick={() => handleEdit(row)}
                         >
-                          Setup Periode Sale
+                          <FaCog className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -83,13 +109,13 @@ export default function Page() {
                   <label className="block font-semibold mb-1 text-gray-700">Periode Awal</label>
                   <input 
                     type="date" 
-                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
                     defaultValue={editData ? editData.periodeAwal.split('-').reverse().join('-') : ""}
                   />
                   <label className="block font-semibold mb-1 text-gray-700">Periode Akhir</label>
                   <input 
                     type="date" 
-                    className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    className="w-full border rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
                     defaultValue={editData ? editData.periodeAkhir.split('-').reverse().join('-') : ""}
                   />
                 </div>
@@ -97,13 +123,13 @@ export default function Page() {
                   <label className="block font-semibold mb-1 text-gray-700">Jam</label>
                   <input 
                     type="time" 
-                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
                     defaultValue="12:00" 
                   />
                   <label className="block font-semibold mb-1 text-gray-700">Jam</label>
                   <input 
                     type="time" 
-                    className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    className="w-full border rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
                     defaultValue="23:59" 
                   />
                 </div>

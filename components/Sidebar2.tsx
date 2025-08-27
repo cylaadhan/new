@@ -1,46 +1,72 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FaChevronLeft, FaChevronRight, FaChevronDown, FaTicketAlt, FaMoneyCheckAlt, FaSignOutAlt, FaChartBar, FaClipboardList, FaWallet, FaCheckCircle, FaCog } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Ticket,
+  Landmark,
+  LogOut,
+  LayoutGrid,
+  ClipboardList,
+  Wallet,
+  CheckCircle,
+  ScanLine,
+  BarChart2
+} from "lucide-react";
 import Image from "next/image";
 
 const menu = [
-  { label: "Dashboard", key: "dashboard", icon: <FaChartBar />, path: "/admin2/dashboard" },
+  { label: "Dashboard", key: "dashboard", icon: <LayoutGrid className="w-5 h-5" />, path: "/admin2/dashboard" },
   {
     label: "Setup Data",
     key: "setup",
-    icon: <FaClipboardList />,
+    icon: <ClipboardList className="w-5 h-5" />,
     dropdown: [
+      { label: "Setup Event", key: "setup-event", path: "/admin2/dashboard/setup-event" },
+      { label: "Setup Form Pemesanan", key: "setup-form", path: "/admin2/dashboard/setup-form-pemesanan" },
+      { label: "Setup Guest Star", key: "setup-gueststar", path: "/admin2/dashboard/setup-gueststar" },
       { label: "Setup Jenis Tiket & Harga", key: "jenis-tiket", path: "/admin2/dashboard/setup-jenis-tiket" },
       { label: "Setup Periode Sale", key: "periode-sale", path: "/admin2/dashboard/setup-periode-tiket" },
     ],
   },
-  { label: "Daftar Tiket", key: "daftar-tiket", icon: <FaTicketAlt />, path: "/admin2/dashboard/daftar-tiket" },
-  { label: "Penjualan Offline", key: "penjualan-offline", icon: <FaMoneyCheckAlt />, path: "/admin2/dashboard/penjualan-offline" },
+  { label: "Pemesanan Tiket", key: "pemesanan-tiket", icon: <Ticket className="w-5 h-5" />, path: "/admin2/dashboard/pemesanan-tiket" },
   {
-    label: "Penukaran Tiket / Gelang",
-    key: "penukaran",
-    icon: <FaCheckCircle />,
+    label: "Data Tiket",
+    key: "data-tiket",
+    icon: <Ticket className="w-5 h-5" />,
     dropdown: [
-      { label: "Penukaran Tiket dan Gelang", key: "offline", path: "/admin2/dashboard/penukaran-tiket" },
-      { label: "Laporan", key: "Laporan", path: "/admin2/dashboard/laporan" },
+      { label: "Daftar Tiket", key: "daftar-tiket", path: "/admin2/dashboard/daftar-tiket" },
+      { label: "Penjualan Offline", key: "penjualan-offline", path: "/admin2/dashboard/penjualan-offline" },
+      { label: "Penukaran Tiket dan Gelang", key: "penukaran-tiket", path: "/admin2/dashboard/penukaran-tiket" },
     ],
   },
-  { label: "Scan Tiket", key: "scan", icon: <FaTicketAlt />, path: "/admin2/dashboard/scan-tiket" },
-  { label: "Withdraw", key: "withdraw", icon: <FaWallet />, path: "/admin2/dashboard/withdraw" },
-  { label: "Pengaturan", key: "pengaturan", icon: <FaCog />, path: "/admin2/dashboard/pengaturan" },
+  { label: "Scan Tiket", key: "scan", icon: <ScanLine className="w-5 h-5" />, path: "/admin2/dashboard/scan-tiket" },
+  { label: "Laporan", key: "Laporan", icon: <BarChart2 className="w-5 h-5" />, path: "/admin2/dashboard/laporan" },
+  { label: "Withdraw", key: "withdraw", icon: <Wallet className="w-5 h-5" />, path: "/admin2/dashboard/withdraw" },
 ];
 
 export default function Sidebar2({ adminName = "Panitia" }: { adminName?: string }) {
   const [open, setOpen] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const activeParent = menu.find(item => item.dropdown?.some(sub => sub.path === pathname));
+    if (activeParent) {
+      setOpenDropdown(activeParent.key);
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("isAdmin2LoggedIn");
+      // Tambahkan penghapusan isAdmin1LoggedIn juga untuk memastikan semua sesi logout
+      localStorage.removeItem("isAdmin1LoggedIn");
     }
-    router.push("/login"); // Ubah dari /admin2/login menjadi /login
+    router.push("/login"); // Pastikan redirect ke halaman login utama
   };
 
   const handleMenuClick = (item: any) => {
@@ -53,15 +79,13 @@ export default function Sidebar2({ adminName = "Panitia" }: { adminName?: string
 
   const handleDropdownClick = (sub: any) => {
     router.push(sub.path);
-    setOpenDropdown(null);
   };
 
   return (
     <aside
-      className={`sticky top-0 h-screen bg-[#5D1A1D] border-r shadow-md flex flex-col z-20 transition-all duration-500 ease-in-out ${open ? "w-64" : "w-16"}`}
-    >
+      className={`sticky top-0 h-screen bg-white border-r shadow-md flex flex-col z-20 transition-all duration-500 ease-in-out font-sans ${open ? "w-64" : "w-16"}`}>
       {/* Header */}
-      <div className={`flex items-center gap-2 p-4 border-b border-[#6D2A2D] transition-all duration-500 ease-in-out ${open ? "justify-start" : "justify-center"}`}>
+      <div className={`flex items-center gap-2 p-4 border-b border-gray-200 transition-all duration-500 ease-in-out ${open ? "justify-start" : "justify-center"}`}>
         <Image
           src="/gam1.jpeg"
           alt="Logo"
@@ -71,69 +95,87 @@ export default function Sidebar2({ adminName = "Panitia" }: { adminName?: string
         />
         {open && (
           <div className="flex flex-col ml-2 transition-opacity duration-500 ease-in-out opacity-100">
-            <span className="font-bold text-lg text-white">Admin2</span>
-            <span className="text-xs text-gray-300">{adminName}</span>
+            <span className="font-bold text-lg text-black">Admin2</span>
+            <span className="text-xs text-gray-500">{adminName}</span>
           </div>
         )}
         <button
-          className={`${open ? "ml-auto" : "mx-auto"} text-gray-300 hover:text-white transition-all duration-500 ease-in-out`}
+          className={`${open ? "ml-auto" : "mx-auto"} text-gray-500 hover:text-black transition-all duration-500 ease-in-out`}
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle sidebar"
         >
-          {open ? <FaChevronLeft /> : <FaChevronRight />}
+          {open ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
         </button>
       </div>
       {/* Menu */}
       <nav className="flex-1 overflow-y-auto transition-all duration-500 ease-in-out">
         <ul className="mt-4 space-y-1">
-          {menu.map((item) => (
-            <li key={item.key}>
-              <button
-                className={`flex items-center w-full px-4 py-2 text-left hover:bg-[#6D2A2D] transition group ${open ? "" : "justify-center"}`}
-                onClick={() => handleMenuClick(item)}
-              >
-                <span className="text-white text-lg mr-3">{item.icon}</span>
-                {open && <span className="font-medium flex-1 text-white">{item.label}</span>}
-                {item.dropdown && open && (
-                  <FaChevronDown
-                    className={`ml-auto transition-transform text-lg ${openDropdown === item.key ? "rotate-180 text-white" : "text-gray-300"}`}
-                  />
-                )}
-              </button>
-              {/* Dropdown */}
-              <ul
-                className={`
-                  ml-8 mt-1 space-y-1
-                  transition-all duration-300 ease-in-out origin-top
-                  ${item.dropdown && openDropdown === item.key && open
-                    ? "max-h-40 opacity-100 scale-y-100"
-                    : "max-h-0 opacity-0 scale-y-95 pointer-events-none"}
-                  overflow-hidden
-                `}
-              >
-                {item.dropdown && item.dropdown.map((sub: any) => (
-                  <li key={sub.key}>
-                    <button
-                      className="flex items-center w-full px-2 py-1 text-left hover:bg-[#6D2A2D] rounded"
-                      onClick={() => handleDropdownClick(sub)}
-                    >
-                      <span className="text-sm text-white">{sub.label}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+          {menu.map((item) => {
+            const isParentOfActive = item.dropdown?.some(sub => sub.path === pathname);
+            const isActive = item.path === pathname || isParentOfActive;
+
+            return (
+              <li key={item.key}>
+                <button
+                  className={`flex items-center w-full px-4 py-2 text-left transition group rounded-md font-medium text-base ${open ? "" : "justify-center"} ${
+                    isActive
+                      ? "text-blue-800 border-r-4 border-blue-800"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                  onClick={() => handleMenuClick(item)}
+                >
+                  <span className={`mr-3`}>{item.icon}</span>
+                  {open && <span className="flex-1">{item.label}</span>}
+                  {item.dropdown && open && (
+                    <ChevronDown
+                      className={`ml-auto transition-transform ${openDropdown === item.key ? "rotate-180" : ""}`}
+                    />
+                  )}
+                </button>
+                {/* Dropdown */}
+                <ul
+                  className={`
+                    ml-8 mt-1 space-y-1
+                    transition-all duration-300 ease-in-out origin-top
+                    ${
+                      item.dropdown && openDropdown === item.key && open
+                        ? "max-h-40 opacity-100 scale-y-100"
+                        : "max-h-0 opacity-0 scale-y-95 pointer-events-none"
+                    }
+                    overflow-hidden
+                  `}
+                >
+                  {item.dropdown?.map((sub: any) => {
+                    const isSubActive = sub.path === pathname;
+                    return (
+                      <li key={sub.key}>
+                        <button
+                          className={`flex items-center w-full px-2 py-1 text-left rounded-md text-base ${ // text-base for dropdown items
+                            isSubActive
+                              ? "text-blue-800"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          }`}
+                          onClick={() => handleDropdownClick(sub)}
+                        >
+                          <span className="text-sm">{sub.label}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       {/* Logout */}
       <div className="p-4 mt-auto">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full px-3 py-2 text-white hover:bg-[#6D2A2D] rounded font-semibold gap-2 justify-center"
+          className="flex items-center w-full px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded gap-2 justify-center font-medium text-base"
         >
-          <span className="flex items-center justify-center w-10 h-10">
-            <FaSignOutAlt className="text-lg" />
+          <span className="flex items-center justify-center">
+            <LogOut className="w-5 h-5 mr-3" />
           </span>
           {open && "Logout"}
         </button>

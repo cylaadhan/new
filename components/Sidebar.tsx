@@ -1,46 +1,48 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FaChevronLeft, FaChevronRight, FaChevronDown, FaTicketAlt, FaMoneyCheckAlt, FaSignOutAlt, FaChartBar, FaClipboardList, FaWallet, FaCheckCircle, FaCog } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight, ChevronDown, Ticket, Landmark, LogOut, LayoutGrid, ClipboardList, Wallet, CheckCircle, DollarSign, BarChart2 } from "lucide-react";
 import Image from "next/image";
 
 const menu = [
-  { label: "Dashboard", key: "dashboard", icon: <FaChartBar />, path: "/admin/dashboard" },
+  { label: "Dashboard", key: "dashboard", icon: <LayoutGrid className="w-5 h-5" />, path: "/admin/dashboard" },
   {
     label: "Setup Data",
     key: "setup",
-    icon: <FaClipboardList />,
+    icon: <ClipboardList className="w-5 h-5" />,
     dropdown: [
       { label: "Setup Jenis Tiket & Harga", key: "jenis-tiket", path: "/admin/dashboard/setup-jenis-tiket" },
       { label: "Setup Periode Sale", key: "periode-sale", path: "/admin/dashboard/setup-periode-sale" },
       { label: "Setup Fee Tiket", key: "fee-tiket", path: "/admin/dashboard/setup-fee-tiket" },
     ],
   },
-  { label: "Verifikasi Pembayaran", key: "verifikasi", icon: <FaMoneyCheckAlt />, path: "/admin/dashboard/verifikasi" },
-  { label: "Daftar Tiket", key: "daftar-tiket", icon: <FaTicketAlt />, path: "/admin/dashboard/daftar-tiket" },
-  {
-    label: "Penukaran Tiket",
-    key: "penukaran",
-    icon: <FaCheckCircle />,
-    dropdown: [
-      { label: "Penukaran Tiket & Gelang", key: "offline", path: "/admin/dashboard/penukaran-offline" },
-      { label: "Laporan", key: "statistik", path: "/admin/dashboard/statistik" },
-    ],
-  },
-  { label: "Withdraw", key: "widraw", icon: <FaWallet />, path: "/admin/dashboard/widraw" },
-  { label: "Pengaturan", key: "pengaturan", icon: <FaCog />, path: "/admin/dashboard/pengaturan" },
+  { label: "Verifikasi Pembayaran", key: "verifikasi", icon: <DollarSign className="w-5 h-5" />, path: "/admin/dashboard/verifikasi" },
+  { label: "Daftar Tiket", key: "daftar-tiket", icon: <Ticket className="w-5 h-5" />, path: "/admin/dashboard/daftar-tiket" },
+  { label: "Data Penukaran Tiket", key: "offline", icon: <CheckCircle className="w-5 h-5" />, path: "/admin/dashboard/penukaran-offline" },
+  { label: "Laporan", key: "statistik", icon: <BarChart2 className="w-5 h-5" />, path: "/admin/dashboard/statistik" },
+  { label: "Withdraw", key: "widraw", icon: <Wallet className="w-5 h-5" />, path: "/admin/dashboard/widraw" },
 ];
 
 export default function Sidebar({ adminName = "Pemilik Event" }: { adminName?: string }) {
   const [open, setOpen] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const activeParent = menu.find(item => item.dropdown?.some(sub => sub.path === pathname));
+    if (activeParent) {
+      setOpenDropdown(activeParent.key);
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("isAdmin1LoggedIn");
+      // Tambahkan penghapusan isAdmin2LoggedIn juga untuk memastikan semua sesi logout
+      localStorage.removeItem("isAdmin2LoggedIn");
     }
-    router.push("/admin/login");
+    router.push("/login");
   };
 
   const handleMenuClick = (item: any) => {
@@ -53,15 +55,14 @@ export default function Sidebar({ adminName = "Pemilik Event" }: { adminName?: s
 
   const handleDropdownClick = (sub: any) => {
     router.push(sub.path);
-    setOpenDropdown(null);
   };
 
   return (
     <aside
-      className={`sticky top-0 h-screen bg-white border-r shadow-md flex flex-col z-20 transition-all duration-500 ease-in-out ${open ? "w-64" : "w-16"}`}
+      className={`sticky top-0 h-screen bg-white border-r shadow-md flex flex-col z-20 transition-all duration-500 ease-in-out font-sans ${open ? "w-64" : "w-16"}`}
     >
       {/* Header */}
-      <div className={`flex items-center gap-2 p-4 border-b transition-all duration-500 ease-in-out ${open ? "justify-start" : "justify-center"}`}>
+      <div className={`flex items-center gap-2 p-4 border-b border-gray-200 transition-all duration-500 ease-in-out ${open ? "justify-start" : "justify-center"}`}>
         <Image
           src="/gam1.jpeg"
           alt="Logo"
@@ -71,69 +72,87 @@ export default function Sidebar({ adminName = "Pemilik Event" }: { adminName?: s
         />
         {open && (
           <div className="flex flex-col ml-2 transition-opacity duration-500 ease-in-out opacity-100">
-            <span className="font-bold text-lg text-gray-800">Eventku</span>
-            <span className="text-xs text-gray-600">{adminName}</span>
+            <span className="font-bold text-lg text-black">Admin</span>
+            <span className="text-xs text-gray-500">{adminName}</span>
           </div>
         )}
         <button
-          className={`${open ? "ml-auto" : "mx-auto"} text-gray-500 hover:text-blue-600 transition-all duration-500 ease-in-out`}
+          className={`${open ? "ml-auto" : "mx-auto"} text-gray-500 hover:text-black transition-all duration-500 ease-in-out`}
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle sidebar"
         >
-          {open ? <FaChevronLeft /> : <FaChevronRight />}
+          {open ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
         </button>
       </div>
       {/* Menu */}
       <nav className="flex-1 overflow-y-auto transition-all duration-500 ease-in-out">
         <ul className="mt-4 space-y-1">
-          {menu.map((item) => (
-            <li key={item.key}>
-              <button
-                className={`flex items-center w-full px-4 py-2 text-left hover:bg-blue-50 transition group ${open ? "" : "justify-center"}`}
-                onClick={() => handleMenuClick(item)}
-              >
-                <span className="text-blue-600 text-lg mr-3">{item.icon}</span>
-                {open && <span className="font-medium flex-1 text-gray-800">{item.label}</span>}
-                {item.dropdown && open && (
-                  <FaChevronDown
-                    className={`ml-auto transition-transform text-lg ${openDropdown === item.key ? "rotate-180 text-blue-600" : "text-gray-600"}`}
-                  />
-                )}
-              </button>
-              {/* Dropdown */}
-              <ul
-                className={`
-                  ml-8 mt-1 space-y-1
-                  transition-all duration-300 ease-in-out origin-top
-                  ${item.dropdown && openDropdown === item.key && open
-                    ? "max-h-40 opacity-100 scale-y-100"
-                    : "max-h-0 opacity-0 scale-y-95 pointer-events-none"}
-                  overflow-hidden
-                `}
-              >
-                {item.dropdown && item.dropdown.map((sub: any) => (
-                  <li key={sub.key}>
-                    <button
-                      className="flex items-center w-full px-2 py-1 text-left hover:bg-blue-100 rounded"
-                      onClick={() => handleDropdownClick(sub)}
-                    >
-                      <span className="text-sm text-gray-800">{sub.label}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+          {menu.map((item) => {
+            const isParentOfActive = item.dropdown?.some(sub => sub.path === pathname);
+            const isActive = item.path === pathname || isParentOfActive;
+
+            return (
+              <li key={item.key}>
+                <button
+                  className={`flex items-center w-full px-4 py-2 text-left transition group rounded-md font-medium text-base ${open ? "" : "justify-center"} ${
+                    isActive
+                      ? "text-blue-800 border-r-4 border-blue-800"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                  onClick={() => handleMenuClick(item)}
+                >
+                  <span className={`mr-3`}>{item.icon}</span>
+                  {open && <span className="flex-1">{item.label}</span>}
+                  {item.dropdown && open && (
+                    <ChevronDown
+                      className={`ml-auto transition-transform ${openDropdown === item.key ? "rotate-180" : ""}`}
+                    />
+                  )}
+                </button>
+                {/* Dropdown */}
+                <ul
+                  className={`
+                    ml-8 mt-1 space-y-1
+                    transition-all duration-300 ease-in-out origin-top
+                    ${
+                      item.dropdown && openDropdown === item.key && open
+                        ? "max-h-40 opacity-100 scale-y-100"
+                        : "max-h-0 opacity-0 scale-y-95 pointer-events-none"
+                    }
+                    overflow-hidden
+                  `}
+                >
+                  {item.dropdown?.map((sub: any) => {
+                    const isSubActive = sub.path === pathname;
+                    return (
+                      <li key={sub.key}>
+                        <button
+                          className={`flex items-center w-full px-2 py-1 text-left rounded-md text-base ${
+                            isSubActive
+                              ? "text-blue-800"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          }`}
+                          onClick={() => handleDropdownClick(sub)}
+                        >
+                          <span className="text-sm">{sub.label}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       {/* Logout */}
       <div className="p-4 mt-auto">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded font-semibold gap-2 justify-center"
+          className="flex items-center w-full px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded gap-2 justify-center font-medium text-base"
         >
-          <span className="flex items-center justify-center w-10 h-10">
-            <FaSignOutAlt className="text-lg" />
+          <span className="flex items-center justify-center">
+            <LogOut className="w-5 h-5 mr-3" />
           </span>
           {open && "Logout"}
         </button>

@@ -1,59 +1,120 @@
 "use client";
 import { useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
+import { Edit, Trash2 } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 
 const data = [
-  { no: 1, kode: "EB", nama: "Early Bird SOERATS 2025", harga: "53000", kuota: "100" },
-  { no: 2, kode: "P1", nama: "Presale 1 SOERATS 2025", harga: "63000", kuota: "200" },
+  { no: 1, kode: "EB", nama: "Early Bird", harga: "53000", kuota: "100" },
+  { no: 2, kode: "P1", nama: "Presale 1", harga: "63000", kuota: "200" },
 ];
 
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [newTicket, setNewTicket] = useState({
+    kode: "",
+    nama: "",
+    harga: "",
+    kuota: ""
+  });
 
   const handleEdit = (row: any) => {
     setEditData(row);
     setShowModal(true);
   };
 
+  const handleAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setNewTicket({
+      ...newTicket,
+      [id]: value
+    });
+  };
+
+  const handleAddTicket = () => {
+    // Logika untuk menambah tiket baru
+    setShowAddModal(false);
+  };
+  
+  // Fungsi untuk memformat angka menjadi format Rupiah
+  const formatRupiah = (angka: string) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(Number(angka));
+  };
+
+  const getTipeClass = (tipe: string) => {
+    switch (tipe) {
+      case "Early Bird":
+        return "bg-green-100 text-green-800";
+      case "Presale 1":
+        return "bg-blue-100 text-blue-800";
+      case "Presale 2":
+        return "bg-purple-100 text-purple-800";
+      case "Presale 3":
+        return "bg-indigo-100 text-indigo-800";
+      case "VIP":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 font-sans">
       <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8 bg-gray-50">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Setup Jenis Tiket & Harga</h1>
-        <div className="bg-white rounded-xl shadow p-6">
-          <button className="mb-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded">
+      <main className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Setup Jenis Tiket & Harga</h1>
+          </div>
+        </div>
+
+        {/* Kotak untuk Tabel */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <button 
+            className="mb-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded shadow transition"
+            onClick={() => setShowAddModal(true)}
+          >
             <FaPlus />
-            Tambah Setup Jenis Tiket & Harga
+            Tambah
           </button>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-200 rounded-lg">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">No.</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Kode</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Nama</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Harga</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-left font-bold text-gray-800">Kuota</th>
-                  <th className="border-b border-gray-200 px-4 py-2 text-center font-bold text-gray-800">Aksi</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">HARGA</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">KUOTA</th>
+                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 {data.map((row) => (
-                  <tr key={row.no} className="even:bg-gray-50 hover:bg-blue-50 transition">
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.no}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.kode}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.nama}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">Rp{row.harga}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-gray-800">{row.kuota}</td>
-                    <td className="border-b border-gray-200 px-4 py-2 text-center">
-                      <div className="flex flex-row flex-wrap justify-center gap-2 sm:gap-3">
-                        <button className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-3 py-1 rounded shadow flex items-center gap-1 transition" onClick={() => handleEdit(row)}>
-                          <FaEdit /> Edit
+                  <tr key={row.no} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="p-4 text-sm text-gray-900">{row.kode}</td>
+                    <td className="p-4">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
+                        {row.nama}
+                      </span>
+                    </td>
+                    <td className="p-4 font-medium text-gray-900 text-sm">{formatRupiah(row.harga)}</td>
+                    <td className="p-4 text-sm text-gray-900">{row.kuota}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <button 
+                          className="text-blue-800 hover:text-black transition-colors duration-200"
+                          onClick={() => handleEdit(row)}
+                        >
+                          <Edit className="w-4 h-4" />
                         </button>
-                        <button className="bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-1 rounded shadow flex items-center gap-1 transition">
-                          <FaTrash /> Hapus
+                        <button className="text-red-600 hover:text-black transition-colors duration-200">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -63,9 +124,10 @@ export default function Page() {
             </table>
           </div>
         </div>
+        
         {/* Modal Edit Pop Up */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-gray-600 bg-opacity-70 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
@@ -94,16 +156,93 @@ export default function Page() {
                 <div className="col-span-2 flex justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded"
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded shadow transition"
                     onClick={() => setShowModal(false)}
                   >
                     Kembali
                   </button>
                   <button
                     type="button"
-                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded"
+                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded shadow transition flex items-center gap-2"
                   >
-                    Edit
+                    <FaSave /> Simpan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        
+        {/* Modal Tambah Pop Up */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-gray-600 bg-opacity-70 animate-fadeIn">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
+              <button
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                onClick={() => setShowAddModal(false)}
+                aria-label="Tutup"
+              >
+                <FaTimes />
+              </button>
+              <h2 className="text-xl font-bold mb-6 text-gray-800">Tambah Setup Jenis Tiket & Harga</h2>
+              <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Kode Jenis Tiket</label>
+                  <input 
+                    type="text" 
+                    id="kode"
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    value={newTicket.kode} 
+                    onChange={handleAddChange}
+                    placeholder="Contoh: EB, P1, P2"
+                  />
+                  <label className="block font-semibold mb-1 text-gray-700">Harga</label>
+                  <div className="flex items-center">
+                    <span className="inline-block px-2 py-2 border border-r-0 rounded-l text-gray-500 bg-gray-100">Rp</span>
+                    <input 
+                      type="number" 
+                      id="harga"
+                      className="w-full border rounded-r px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                      value={newTicket.harga} 
+                      onChange={handleAddChange}
+                      placeholder="Contoh: 50000"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-gray-700">Nama Jenis Tiket</label>
+                  <input 
+                    type="text" 
+                    id="nama"
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    value={newTicket.nama} 
+                    onChange={handleAddChange}
+                    placeholder="Contoh: Early Bird SOERATS 2025"
+                  />
+                  <label className="block font-semibold mb-1 text-gray-700">Kuota Tiket</label>
+                  <input 
+                    type="number" 
+                    id="kuota"
+                    className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
+                    value={newTicket.kuota} 
+                    onChange={handleAddChange}
+                    placeholder="Contoh: 100"
+                  />
+                </div>
+                <div className="col-span-2 flex justify-end gap-2 mt-4">
+                  <button
+                    type="button"
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded shadow transition"
+                    onClick={() => setShowAddModal(false)}
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    type="button"
+                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded shadow transition flex items-center gap-2"
+                    onClick={handleAddTicket}
+                  >
+                    <FaSave /> Tambah
                   </button>
                 </div>
               </form>

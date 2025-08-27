@@ -69,7 +69,7 @@ export default function LoginPage() {
             </div>
             <div className="flex justify-center items-center h-full">
               <Image 
-                src="/gam1.jpeg" 
+                src="/lorg.png" 
                 alt="Event Management" 
                 width={300} 
                 height={300}
@@ -86,7 +86,7 @@ export default function LoginPage() {
           <div className="mb-8 text-center">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <Image src="/globe.svg" alt="Logo" width={32} height={32} className="invert" />
+                <Image src="/lorg.png" alt="Logo" width={32} height={32} className="invert" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-800">Login Admin</h1>
