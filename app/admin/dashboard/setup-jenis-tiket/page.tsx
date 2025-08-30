@@ -11,31 +11,11 @@ const data = [
 
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
-  const [newTicket, setNewTicket] = useState({
-    kode: "",
-    nama: "",
-    harga: "",
-    kuota: ""
-  });
 
   const handleEdit = (row: any) => {
     setEditData(row);
     setShowModal(true);
-  };
-
-  const handleAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setNewTicket({
-      ...newTicket,
-      [id]: value
-    });
-  };
-
-  const handleAddTicket = () => {
-    // Logika untuk menambah tiket baru
-    setShowAddModal(false);
   };
   
   // Fungsi untuk memformat angka menjadi format Rupiah
@@ -71,63 +51,69 @@ export default function Page() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Setup Jenis Tiket & Harga</h1>
+            <p className="text-gray-600 mt-1">Atur jenis tiket dan harga untuk event Anda</p>
           </div>
         </div>
 
-        {/* Kotak untuk Tabel */}
-        <div className="bg-white rounded-xl shadow-md p-6">
+        {/* Tombol Tambah */}
+        <div className="mb-6">
           <button 
-            className="mb-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded shadow transition"
-            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition shadow-sm"
+            onClick={() => {
+              setEditData(null);
+              setShowModal(true);
+            }}
           >
-            <FaPlus />
-            Tambah
+            <FaPlus className="h-4 w-4" />
+            <span>Tambah Jenis Tiket</span>
           </button>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">HARGA</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">KUOTA</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row) => (
-                  <tr key={row.no} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="p-4 text-sm text-gray-900">{row.kode}</td>
-                    <td className="p-4">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
-                        {row.nama}
-                      </span>
-                    </td>
-                    <td className="p-4 font-medium text-gray-900 text-sm">{formatRupiah(row.harga)}</td>
-                    <td className="p-4 text-sm text-gray-900">{row.kuota}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <button 
-                          className="text-blue-800 hover:text-black transition-colors duration-200"
-                          onClick={() => handleEdit(row)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="text-red-600 hover:text-black transition-colors duration-200">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        </div>
+
+        {/* Box-box Jenis Tiket */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data.map((tiket) => (
+            <div key={tiket.no} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-col gap-1">
+                  <span className={`text-xs font-medium px-3 py-1 rounded-full ${getTipeClass(tiket.nama)}`}>
+                    {tiket.nama}
+                  </span>
+                  <span className="text-xs text-gray-500 font-medium mt-2">KODE: {tiket.kode}</span>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1.5 rounded-full transition-colors"
+                    onClick={() => handleEdit(tiket)}
+                    title="Edit"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button 
+                    className="text-red-600 hover:text-red-800 hover:bg-red-100 p-1.5 rounded-full transition-colors"
+                    title="Hapus"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex justify-between mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">HARGA</p>
+                  <p className="text-gray-800 font-medium">{formatRupiah(tiket.harga)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">KUOTA</p>
+                  <p className="text-gray-800 font-medium">{tiket.kuota} tiket</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
         
-        {/* Modal Edit Pop Up */}
+        {/* Modal Tambah/Edit Pop Up */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-gray-600 bg-opacity-70 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
@@ -136,113 +122,59 @@ export default function Page() {
               >
                 <FaTimes />
               </button>
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Edit Setup Jenis Tiket & Harga</h2>
+              <h2 className="text-xl font-bold mb-6 text-gray-800">
+                {editData ? "Edit Jenis Tiket" : "Tambah Jenis Tiket Baru"}
+              </h2>
               <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Kode Jenis Tiket</label>
-                  <input type="text" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue={editData?.kode || ""} />
-                  <label className="block font-semibold mb-1 text-gray-700">Harga</label>
-                  <div className="flex items-center">
-                    <span className="inline-block px-2 py-2 border border-r-0 rounded-l text-gray-500 bg-gray-100">Rp</span>
-                    <input type="number" className="w-full border rounded-r px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue={editData?.harga || ""} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Nama Jenis Tiket</label>
-                  <input type="text" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue={editData?.nama || ""} />
-                  <label className="block font-semibold mb-1 text-gray-700">Kuota Tiket</label>
-                  <input type="number" className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue={editData?.kuota || ""} />
-                </div>
-                <div className="col-span-2 flex justify-end gap-2 mt-4">
-                  <button
-                    type="button"
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded shadow transition"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Kembali
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded shadow transition flex items-center gap-2"
-                  >
-                    <FaSave /> Simpan
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        
-        {/* Modal Tambah Pop Up */}
-        {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-gray-600 bg-opacity-70 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
-              <button
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
-                onClick={() => setShowAddModal(false)}
-                aria-label="Tutup"
-              >
-                <FaTimes />
-              </button>
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Tambah Setup Jenis Tiket & Harga</h2>
-              <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Kode Jenis Tiket</label>
+                  <label className="block font-medium mb-1 text-gray-700">Kode Jenis Tiket</label>
                   <input 
                     type="text" 
-                    id="kode"
                     className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
-                    value={newTicket.kode} 
-                    onChange={handleAddChange}
+                    defaultValue={editData?.kode || ""}
                     placeholder="Contoh: EB, P1, P2"
                   />
-                  <label className="block font-semibold mb-1 text-gray-700">Harga</label>
+                  <label className="block font-medium mb-1 text-gray-700">Harga</label>
                   <div className="flex items-center">
                     <span className="inline-block px-2 py-2 border border-r-0 rounded-l text-gray-500 bg-gray-100">Rp</span>
                     <input 
                       type="number" 
-                      id="harga"
                       className="w-full border rounded-r px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
-                      value={newTicket.harga} 
-                      onChange={handleAddChange}
+                      defaultValue={editData?.harga || ""}
                       placeholder="Contoh: 50000"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Nama Jenis Tiket</label>
+                  <label className="block font-medium mb-1 text-gray-700">Nama Jenis Tiket</label>
                   <input 
                     type="text" 
-                    id="nama"
                     className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
-                    value={newTicket.nama} 
-                    onChange={handleAddChange}
-                    placeholder="Contoh: Early Bird SOERATS 2025"
+                    defaultValue={editData?.nama || ""}
+                    placeholder="Contoh: Early Bird"
                   />
-                  <label className="block font-semibold mb-1 text-gray-700">Kuota Tiket</label>
+                  <label className="block font-medium mb-1 text-gray-700">Kuota Tiket</label>
                   <input 
                     type="number" 
-                    id="kuota"
                     className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" 
-                    value={newTicket.kuota} 
-                    onChange={handleAddChange}
+                    defaultValue={editData?.kuota || ""}
                     placeholder="Contoh: 100"
                   />
                 </div>
                 <div className="col-span-2 flex justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded shadow transition"
-                    onClick={() => setShowAddModal(false)}
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-4 py-2 rounded"
+                    onClick={() => setShowModal(false)}
                   >
-                    Kembali
+                    Batal
                   </button>
                   <button
                     type="button"
-                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded shadow transition flex items-center gap-2"
-                    onClick={handleAddTicket}
+                    className="bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 rounded flex items-center gap-2"
                   >
-                    <FaSave /> Tambah
+                    <FaSave className="w-4 h-4" />
+                    {editData ? "Simpan" : "Tambah"}
                   </button>
                 </div>
               </form>

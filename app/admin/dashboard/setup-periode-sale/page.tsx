@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
-import { Settings } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 
 const data = [
-  { no: 1, nama: "Early Bird", mulai: "01-08-2025", selesai: "10-08-2025" },
-  { no: 2, nama: "Presale 1", mulai: "11-08-2025", selesai: "20-08-2025" },
+  { id: 1, nama: "Early Bird", mulai: "01-08-2025", selesai: "10-08-2025" },
+  { id: 2, nama: "Presale 1", mulai: "11-08-2025", selesai: "20-08-2025" },
+  { id: 3, nama: "Presale 2", mulai: "21-08-2025", selesai: "30-08-2025" },
+  { id: 4, nama: "Presale 3", mulai: "01-09-2025", selesai: "10-09-2025" },
 ];
 
 export default function Page() {
@@ -43,56 +45,60 @@ export default function Page() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Setup Periode Sale</h1>
+            <p className="text-gray-600 mt-1">Atur periode penjualan tiket untuk event Anda</p>
           </div>
         </div>
 
-        {/* Kotak untuk Tabel */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <button className="mb-4 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
+        {/* Tombol Tambah */}
+        <div className="mb-6">
+          <button 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition shadow-sm"
+            onClick={() => {
+              setEditData(null);
+              setShowModal(true);
+            }}
+          >
             <FaPlus className="h-4 w-4" />
-            <span>Tambah</span>
+            <span>Tambah Periode Sale</span>
           </button>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AWAL</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AKHIR</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row) => (
-                  <tr key={row.no} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="p-4 text-sm text-gray-900">{row.no}</td>
-                    <td className="p-4">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
-                        {row.nama}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-gray-900">{row.mulai}</td>
-                    <td className="p-4 text-sm text-gray-900">{row.selesai}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <button 
-                          className="text-blue-800 hover:text-black transition-colors duration-200"
-                          onClick={() => handleEdit(row)}
-                        >
-                          <Settings className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
-        {/* Modal Edit Pop Up */}
+
+        {/* Box-box Periode Sale */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data.map((periode) => (
+            <div key={periode.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+              <div className="flex justify-between items-start mb-4">
+                <span className={`text-xs font-medium px-3 py-1 rounded-full ${getTipeClass(periode.nama)}`}>
+                  {periode.nama}
+                </span>
+                <div className="flex gap-2">
+                  <button 
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                    onClick={() => handleEdit(periode)}
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                </div>
+                {/* Ikon trash dihapus dari sini */}
+              </div>
+              
+              <div className="flex gap-8 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">PERIODE AWAL</p>
+                  <p className="text-gray-800 font-medium">{periode.mulai}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">PERIODE AKHIR</p>
+                  <p className="text-gray-800 font-medium">{periode.selesai}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Modal Tambah/Edit Pop Up */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
@@ -101,32 +107,45 @@ export default function Page() {
               >
                 <FaTimes />
               </button>
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Setup Periode Sale</h2>
+              <h2 className="text-xl font-bold mb-6 text-gray-800">
+                {editData ? "Edit Periode Sale" : "Tambah Periode Sale Baru"}
+              </h2>
               <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Periode Awal</label>
-                  <input type="date" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue="2025-03-15" />
-                  <label className="block font-semibold mb-1 text-gray-700">Periode Akhir</label>
-                  <input type="date" className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue="2025-04-16" />
+                <div className="sm:col-span-2">
+                  <label className="block font-medium mb-1 text-gray-700">Nama Periode</label>
+                  <select className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none">
+                    <option>Early Bird</option>
+                    <option>Presale 1</option>
+                    <option>Presale 2</option>
+                    <option>Presale 3</option>
+                    <option>VIP</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Jam</label>
-                  <input type="time" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue="12:00" />
-                  <label className="block font-semibold mb-1 text-gray-700">Jam</label>
-                  <input type="time" className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none placeholder-gray-400" defaultValue="23:59" />
+                  <label className="block font-medium mb-1 text-gray-700">Periode Awal</label>
+                  <input type="date" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none" defaultValue={editData ? "2025-08-01" : ""} />
+                  <label className="block font-medium mb-1 text-gray-700">Jam Mulai</label>
+                  <input type="time" className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none" defaultValue={editData ? "00:00" : ""} />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1 text-gray-700">Periode Akhir</label>
+                  <input type="date" className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none" defaultValue={editData ? "2025-08-10" : ""} />
+                  <label className="block font-medium mb-1 text-gray-700">Jam Selesai</label>
+                  <input type="time" className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none" defaultValue={editData ? "23:59" : ""} />
                 </div>
                 <div className="col-span-2 flex justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded"
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-4 py-2 rounded"
                     onClick={() => setShowModal(false)}
                   >
-                    Kembali
+                    Batal
                   </button>
                   <button
                     type="button"
-                    className="bg-[#4B1E0E] hover:bg-[#2d1208] text-white font-semibold px-4 py-2 rounded"
+                    className="bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 rounded flex items-center gap-2"
                   >
+                    <FaSave className="w-4 h-4" />
                     Simpan
                   </button>
                 </div>

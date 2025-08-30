@@ -244,7 +244,11 @@ export default function PenjualanOfflinePage() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
+  const formatTanggal = (tanggalStr: string) => {
+    const [tanggal, waktu] = tanggalStr.split(' ');
+    const [tahun, bulan, hari] = tanggal.split('-');
+    return `${hari}-${bulan}-${tahun} ${waktu}`;
+  };
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       <Sidebar2 adminName="Admin Tiket" />
@@ -388,7 +392,7 @@ export default function PenjualanOfflinePage() {
               <input
                 type="text"
                 placeholder="Cari nama, email, atau no. WA"
-                className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 text-black font-medium"
+                className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80 text-black font-medium" // Diubah dari w-64 menjadi w-80
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -420,7 +424,7 @@ export default function PenjualanOfflinePage() {
                   {/* Info Pemesan */}
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm text-gray-600">{item.tanggalPemesanan}</p>
+                      <p className="font-mono text-sm text-gray-600">{formatTanggal(item.tanggalPemesanan)}</p>
                       <span className={"text-xs font-semibold px-2 py-1 rounded-md " + getTipeClass(item.jenisTicket)}>
                         {item.jenisTicket}
                       </span>
@@ -445,7 +449,7 @@ export default function PenjualanOfflinePage() {
                 </div>
 
                 {/* Bagian Kanan - Aksi Hapus */}
-                <div className="md:w-45 bg-gray-50 rounded-lg p-3 flex items-center justify-center">
+                <div className="md:w-52 bg-gray-50 rounded-lg p-3 flex items-center justify-center"> {/* Diubah dari md:w-60 menjadi md:w-52 */}
                   <button 
                     onClick={() => handleDelete(item.id)}
                     className="p-2 text-red-600 hover:bg-red-100 hover:text-red-800 rounded-full transition-colors" 

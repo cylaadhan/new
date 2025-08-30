@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { FaPlus, FaTimes, FaSave, FaCog } from "react-icons/fa";
+import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
+import { Edit, Trash2 } from "lucide-react";
 import Sidebar2 from "../../../../components/Sidebar2";
 
 const data = [
@@ -45,54 +46,61 @@ export default function Page() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Setup Periode Sale</h1>
+            <p className="text-gray-600 mt-1">Atur periode penjualan tiket untuk event Anda</p>
           </div>
         </div>
 
-        {/* Kotak untuk Tabel */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <button className="mb-4 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
+        {/* Tombol Tambah */}
+        <div className="mb-6">
+          <button 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition shadow-sm"
+            onClick={() => {
+              setEditData(null);
+              setShowModal(true);
+            }}
+          >
             <FaPlus className="h-4 w-4" />
-            <span>Tambah</span>
+            <span>Tambah Periode Sale</span>
           </button>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="p-4 font-medium text-gray-500 text-xs">KODE</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">NAMA</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AWAL</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">PERIODE AKHIR</th>
-                  <th className="p-4 font-medium text-gray-500 text-xs">AKSI</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row) => (
-                  <tr key={row.kode} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="p-4 text-sm text-gray-900">{row.kode}</td>
-                    <td className="p-4">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full text-center w-fit ${getTipeClass(row.nama)}`}>
-                        {row.nama}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-gray-900">{row.periodeAwal}</td>
-                    <td className="p-4 text-sm text-gray-900">{row.periodeAkhir}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <button 
-                          className="text-blue-800 hover:text-black transition-colors duration-200"
-                          onClick={() => handleEdit(row)}
-                        >
-                          <FaCog className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
-        {/* Modal Edit Pop Up */}
+
+        {/* Box-box Periode Sale */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data.map((periode) => (
+            <div key={periode.kode} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className={`text-xs font-medium px-3 py-1 rounded-full ${getTipeClass(periode.nama)}`}>
+                    {periode.nama}
+                  </span>
+                  <span className="text-xs text-gray-500 font-medium mt-2 block">KODE: {periode.kode}</span>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1.5 rounded-full transition-colors"
+                    onClick={() => handleEdit(periode)}
+                    title="Edit"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex gap-8 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">PERIODE AWAL</p>
+                  <p className="text-gray-800 font-medium">{periode.periodeAwal}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">PERIODE AKHIR</p>
+                  <p className="text-gray-800 font-medium">{periode.periodeAkhir}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Modal Tambah/Edit Pop Up */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
@@ -103,49 +111,62 @@ export default function Page() {
               >
                 <FaTimes />
               </button>
-              <h2 className="text-xl font-bold mb-6 text-gray-800">Setup Periode Sale</h2>
+              <h2 className="text-xl font-bold mb-6 text-gray-800">
+                {editData ? "Edit Periode Sale" : "Tambah Periode Sale Baru"}
+              </h2>
               <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block font-medium mb-1 text-gray-700">Nama Periode</label>
+                  <select className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none">
+                    <option>Early Bird</option>
+                    <option>Presale 1</option>
+                    <option>Presale 2</option>
+                    <option>Presale 3</option>
+                    <option>VIP</option>
+                  </select>
+                </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Periode Awal</label>
+                  <label className="block font-medium mb-1 text-gray-700">Periode Awal</label>
                   <input 
                     type="date" 
-                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none" 
                     defaultValue={editData ? editData.periodeAwal.split('-').reverse().join('-') : ""}
                   />
-                  <label className="block font-semibold mb-1 text-gray-700">Periode Akhir</label>
+                  <label className="block font-medium mb-1 text-gray-700">Jam Mulai</label>
                   <input 
-                    type="date" 
-                    className="w-full border rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
-                    defaultValue={editData ? editData.periodeAkhir.split('-').reverse().join('-') : ""}
+                    type="time" 
+                    className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none" 
+                    defaultValue="12:00" 
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold mb-1 text-gray-700">Jam</label>
+                  <label className="block font-medium mb-1 text-gray-700">Periode Akhir</label>
                   <input 
-                    type="time" 
-                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
-                    defaultValue="12:00" 
+                    type="date" 
+                    className="w-full border rounded px-3 py-2 mb-2 text-gray-800 focus:border-blue-300 focus:outline-none" 
+                    defaultValue={editData ? editData.periodeAkhir.split('-').reverse().join('-') : ""}
                   />
-                  <label className="block font-semibold mb-1 text-gray-700">Jam</label>
+                  <label className="block font-medium mb-1 text-gray-700">Jam Selesai</label>
                   <input 
                     type="time" 
-                    className="w-full border rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                    className="w-full border rounded px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none" 
                     defaultValue="23:59" 
                   />
                 </div>
                 <div className="col-span-2 flex justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded shadow transition"
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-4 py-2 rounded"
                     onClick={() => setShowModal(false)}
                   >
                     Batal
                   </button>
                   <button
                     type="button"
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded shadow transition flex items-center gap-2"
+                    className="bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 rounded flex items-center gap-2"
                   >
-                    <FaSave /> Simpan
+                    <FaSave className="w-4 h-4" />
+                    Simpan
                   </button>
                 </div>
               </form>

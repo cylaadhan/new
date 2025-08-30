@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "../../../../components/Sidebar";
 import { useState } from "react";
-import { DollarSign, Info, Save, RefreshCw, AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw, Save } from "lucide-react";
 
 export default function Page() {
   const [feeAmount, setFeeAmount] = useState(""); 
@@ -25,64 +25,24 @@ export default function Page() {
     }, 800);
   };
   
-  // Menghitung contoh fee untuk beberapa tiket
   const feeValue = feeAmount === "" ? 0 : parseInt(feeAmount);
-  const exampleFee = {
-    single: feeValue,
-    five: feeValue * 5,
-    ten: feeValue * 10
-  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar adminName="Pemilik Event" />
       <main className="flex-1 p-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full mx-0"> 
           {/* Header dengan informasi halaman */}
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Setup Fee Tiket</h1>
               <p className="text-gray-500 mt-1">Atur biaya layanan untuk setiap tiket yang terjual</p>
             </div>
-            <div className="bg-blue-500 text-white p-3 rounded-full">
-              <DollarSign size={24} />
-            </div>
-          </div>
           
-          {/* Card informasi tentang fee */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-            <div className="flex items-start gap-3 mb-4">
-              <Info className="text-blue-500 mt-1 flex-shrink-0" />
-              <div>
-                <h2 className="font-semibold text-gray-800 text-lg">Tentang Fee Tiket</h2>
-                <p className="text-gray-600 mt-1">
-                  Fee tiket adalah biaya layanan yang dikenakan untuk setiap tiket yang terjual. 
-                  Fee ini akan ditambahkan ke harga tiket dan akan menjadi pendapatan platform.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-              <h3 className="font-medium text-blue-800 mb-2">Contoh Perhitungan Fee</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <p className="text-gray-500 text-sm">1 Tiket</p>
-                  <p className="font-bold text-gray-800">Rp {exampleFee.single.toLocaleString()}</p>
-                </div>
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <p className="text-gray-500 text-sm">5 Tiket</p>
-                  <p className="font-bold text-gray-800">Rp {exampleFee.five.toLocaleString()}</p>
-                </div>
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <p className="text-gray-500 text-sm">10 Tiket</p>
-                  <p className="font-bold text-gray-800">Rp {exampleFee.ten.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
           </div>
           
           {/* Form pengaturan fee */}
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="bg-white rounded-xl shadow-md p-6 w-[600px]"> 
             <h2 className="font-semibold text-gray-800 text-lg mb-4">Pengaturan Fee Tiket</h2>
             
             {showSuccess && (

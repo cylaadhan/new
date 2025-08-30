@@ -1,6 +1,5 @@
 "use client";
-
-import Sidebar from "../../../components/Sidebar";
+import Sidebar2 from "../../../components/Sidebar";
 import { DollarSign, RefreshCw, Download, BarChart2, Clock, Ticket, ChevronDown, TrendingUp } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
@@ -145,12 +144,12 @@ export default function DashboardPage() {
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-    }, 500); // Animasi berputar selama 0.5 detik
+    }, 500); // Animasi berputar selama 1 detik
   };
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar adminName="Pemilik Event" />
+      <Sidebar2 adminName="Admin Tiket" />
       <main className="flex-1 p-8">
         {/* Header */}
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
@@ -192,12 +191,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Cards & Main Content Area */}
         <div className="space-y-6">
-          {/* Top Row: Total Tiket & Total Revenue */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Total Tiket Card */}
-            <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 flex justify-between items-center hover:shadow-xl transition-shadow duration-300">
               <div>
                 <p className="text-gray-500">Total Tiket</p>
                 <p className="text-4xl font-bold text-gray-900">13</p>
@@ -206,9 +202,9 @@ export default function DashboardPage() {
                 <Ticket className="h-7 w-7" />
               </div>
             </div>
-
+          
             {/* Total Revenue Card */}
-            <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 flex justify-between items-center hover:shadow-xl transition-shadow duration-300">
               <div>
                 <p className="text-gray-500">Total Revenue</p>
                 <p className="text-4xl font-bold text-gray-900">Rp 1.050.000</p>
@@ -218,13 +214,13 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-
+          
           {/* Bottom Content Area */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Kolom Kiri: Status Tiket dan Statistik Status Tiket */}
             <div className="flex flex-col gap-6">
               {/* Status Tiket */}
-              <div className="bg-white rounded-xl shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                 <div className="flex justify-between items-center mb-2 text-black">
                   <h2 className="font-bold text-lg">Status Tiket</h2>
                   <BarChart2 className="text-gray-400 h-5 w-5" />
@@ -248,7 +244,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Statistik Status Tiket */}
-              <div className="bg-white rounded-xl shadow p-6 flex flex-col flex-grow">
+              <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col flex-grow hover:shadow-xl transition-shadow duration-300">
                 <div className="flex justify-between items-center mb-2 text-black">
                   <h2 className="font-bold text-lg">Statistik Status Tiket</h2>
                   <TrendingUp className="text-gray-400 h-5 w-5" />
@@ -261,7 +257,7 @@ export default function DashboardPage() {
 
             {/* Kolom Kanan: Penjualan Terbaru */}
             <div>
-              <div className="bg-white rounded-xl shadow p-6 h-full">
+              <div className="bg-white rounded-xl shadow-lg p-6 h-full hover:shadow-xl transition-shadow duration-300">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="font-bold text-lg text-gray-800">Penjualan Terbaru</h2>
                   <Clock className="text-gray-400 h-5 w-5" />

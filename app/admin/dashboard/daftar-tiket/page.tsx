@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "../../../../components/Sidebar";
-import { Search, RefreshCw, FileText, Download, DollarSign, Ticket } from "lucide-react";
-import { useState } from "react";
+import { Search, RefreshCw, FileText, Download, DollarSign, Ticket, Edit, Trash2, Eye, SlidersHorizontal, ListFilter, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const data = [
   {
@@ -104,6 +104,106 @@ const data = [
     total: "225000",
     dibayar: "225600",
   },
+  {
+    tgl: "15-06-2025 13:25",
+    nama: "Merisa",
+    email: "markisa@gmail.com",
+    jenis: "Presale 1",
+    jumlah: 3,
+    harga: "75000",
+    total: "225000",
+    dibayar: "225600",
+  },
+  {
+    tgl: "01-07-2025 10:15",
+    nama: "Raditya",
+    email: "raditya@gmail.com",
+    jenis: "Early Bird",
+    jumlah: 2,
+    harga: "53000",
+    total: "106000",
+    dibayar: "106300",
+  },
+  {
+    tgl: "03-07-2025 14:30",
+    nama: "Kirana",
+    email: "kirana@gmail.com",
+    jenis: "VIP",
+    jumlah: 1,
+    harga: "150000",
+    total: "150000",
+    dibayar: "150250",
+  },
+  {
+    tgl: "05-07-2025 09:45",
+    nama: "Bintang",
+    email: "bintang@gmail.com",
+    jenis: "Presale 2",
+    jumlah: 3,
+    harga: "85000",
+    total: "255000",
+    dibayar: "255500",
+  },
+  {
+    tgl: "08-07-2025 16:20",
+    nama: "Zahra",
+    email: "zahra@gmail.com",
+    jenis: "Presale 1",
+    jumlah: 2,
+    harga: "75000",
+    total: "150000",
+    dibayar: "150300",
+  },
+  {
+    tgl: "10-07-2025 11:10",
+    nama: "Daffa",
+    email: "daffa@gmail.com",
+    jenis: "Early Bird",
+    jumlah: 4,
+    harga: "53000",
+    total: "212000",
+    dibayar: "212500",
+  },
+  {
+    tgl: "12-07-2025 13:40",
+    nama: "Nasywa",
+    email: "nasywa@gmail.com",
+    jenis: "Presale 3",
+    jumlah: 2,
+    harga: "95000",
+    total: "190000",
+    dibayar: "190400",
+  },
+  {
+    tgl: "15-07-2025 15:25",
+    nama: "Rizky",
+    email: "rizky@gmail.com",
+    jenis: "VIP",
+    jumlah: 1,
+    harga: "150000",
+    total: "150000",
+    dibayar: "150250",
+  },
+  {
+    tgl: "18-07-2025 10:30",
+    nama: "Aqila",
+    email: "aqila@gmail.com",
+    jenis: "Presale 2",
+    jumlah: 3,
+    harga: "85000",
+    total: "255000",
+    dibayar: "255500",
+  },
+  {
+    tgl: "20-07-2025 14:15",
+    nama: "Farhan",
+    email: "farhan@gmail.com",
+    jenis: "Presale 1",
+    jumlah: 2,
+    harga: "75000",
+    total: "150000",
+    dibayar: "150300",
+  },
 ];
 
 // Fungsi untuk mendapatkan kelas warna berdasarkan tipe tiket
@@ -139,9 +239,15 @@ const formatRupiah = (angka: string) => {
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [jenisFilter, setJenisFilter] = useState("Semua Jenis");
+  const [showFilter, setShowFilter] = useState(false);
+
+  // Reset halaman saat filter berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, jenisFilter]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -174,20 +280,42 @@ export default function Page() {
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  // Handle page change
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50 font-sans">
       <Sidebar />
       <main className="flex-1 p-8 overflow-auto">
-        {/* Judul dan Tombol Refresh */}
+        {/* Judul dan Tombol Filter/Refresh */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Daftar Tiket</h1>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
-          >
-            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowFilter(!showFilter)}
+              className="flex items-center justify-center w-10 h-10 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow-md transition transform hover:scale-105"
+              title="Filter"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
         
         {/* Statistik Box */}
@@ -261,6 +389,46 @@ export default function Page() {
           </div>
         </div>
 
+        {/* Panel Filter */}
+        {showFilter && (
+          <div className="mb-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-semibold text-gray-800 text-lg">Filter Data</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium mb-1 text-gray-700 text-sm">Jenis Tiket</label>
+                  <select 
+                    className="border rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full"
+                    value={jenisFilter}
+                    onChange={(e) => setJenisFilter(e.target.value)}
+                  >
+                    <option>Semua Jenis</option>
+                    <option>Early Bird</option>
+                    <option>Presale 1</option>
+                    <option>Presale 2</option>
+                    <option>Presale 3</option>
+                    <option>VIP</option>
+                  </select>
+                </div>
+                <div className="self-end mb-1">
+                  <button 
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-full shadow-md transition transform hover:scale-105"
+                    onClick={() => {
+                      setCurrentPage(1);
+                      setShowFilter(false);
+                    }}
+                  >
+                    <ListFilter className="w-4 h-4" />
+                    <span>Terapkan Filter</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Filter & Search */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           {/* Search Bar */}
@@ -275,81 +443,65 @@ export default function Page() {
             />
           </div>
 
-          {/* Filter Jenis Tiket (dipindahkan ke sebelah kiri Show entries) */}
-          <div className="flex items-center gap-4">
-            {/* Filter Jenis Tiket */}
+          {/* Items Per Page */}
+          <div className="flex items-center gap-2">
+            <label className="font-medium text-gray-700 text-sm">Show</label>
             <select 
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              value={jenisFilter}
-              onChange={(e) => setJenisFilter(e.target.value)}
+              className="border rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
             >
-              <option>Semua Jenis</option>
-              <option>Early Bird</option>
-              <option>Presale 1</option>
-              <option>Presale 2</option>
-              <option>Presale 3</option>
-              <option>VIP</option>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
-          
-            {/* Items Per Page (dipindahkan ke sebelah kanan Filter Jenis Tiket) */}
-            <div className="flex items-center gap-2">
-              <label className="font-medium text-gray-700 text-sm">Show</label>
-              <select 
-                className="border rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-sm text-gray-700">entries</span>
+            <span className="text-sm text-gray-700">entries</span>
+            
+            {/* Total Tiket */}
+            <div className="px-4 py-2 text-gray-600 font-medium">
+              Total: {filteredData.length} tiket
             </div>
           </div>
         </div>
-
-        {/* Daftar Tiket dalam format Tabel */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Tgl Pemesanan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nama Pemesan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Jenis Tiket</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Jumlah Tiket</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Harga Satuan</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Total Harga</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Jumlah Dibayarkan</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentItems.map((item, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.tgl}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.nama}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-sm font-medium rounded-md ${getJenisClass(item.jenis)}`}>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentItems.map((item, index) => (
+              <div key={index} className="flex flex-col bg-gray-50 rounded-lg overflow-hidden">
+                {/* Bagian Atas - Informasi Utama */}
+                <div className="p-4 flex justify-between items-center">
+                  {/* Info Tiket dan Pemesan */}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-mono text-sm text-gray-600">{item.tgl}</p>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-md ${getJenisClass(item.jenis)}`}>
                         {item.jenis}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{item.jumlah}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">Rp{item.harga}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">Rp{item.total}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">Rp{item.dibayar}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <button className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-4 py-2 rounded-md text-sm transition">
-                        Daftar Tiket
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="mt-1">
+                      <p className="text-xl font-bold text-gray-900">{item.nama}</p>
+                      <p className="text-sm text-gray-500">{item.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Info Tiket */}
+                  <div className="text-right">
+                    <p className="text-base font-medium text-gray-700">{formatRupiah(item.harga)}</p>
+                    <p className="text-base font-medium text-gray-700">{item.jumlah} tiket</p>
+                    <p className="text-base font-semibold text-gray-800">{formatRupiah(item.total)}</p>
+                    <p className="text-base text-gray-800 font-semibold">{formatRupiah(item.dibayar)}</p>
+                  </div>
+                </div>
+
+                {/* Bagian Bawah - Aksi */}
+                <div className="bg-gray-50 p-3 flex items-center justify-center gap-2 border-t border-gray-200">
+                  <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors" title="Daftar Tiket">
+                    <Ticket size={18} />
+                    <span>Daftar Tiket</span>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
           
           {/* Tampilkan pesan jika tidak ada data */}
@@ -361,26 +513,42 @@ export default function Page() {
           )}
           
           {/* Pagination */}
-          <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-            <span>Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries</span>
-            <div className="flex items-center gap-2">
-              <button 
-                className="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 hover:bg-gray-200 font-medium transition"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span className="px-3 py-1 rounded-lg border border-gray-300 bg-white font-medium">{currentPage}</span>
-              <button 
-                className="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 hover:bg-gray-200 font-medium transition"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
+          {filteredData.length > 0 && (
+            <div className="flex justify-between items-center py-4 mt-4 px-2">
+              <span className="text-sm text-gray-600">
+                Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button 
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

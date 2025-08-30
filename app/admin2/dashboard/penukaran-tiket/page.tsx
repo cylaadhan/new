@@ -447,7 +447,7 @@ export default function PenukaranTiketPage() {
                     <span className={`px-2 py-1 text-sm font-bold rounded-md ${getTipeClass(ticket.jenisTiket)}`}>
                       {ticket.jenisTiket}
                     </span>
-                    <p className="text-base font-medium text-gray-700 mt-1">{ticket.noTiket}</p>
+                    <p className="text-base font-medium text-gray-700 mt-1 font-mono">{ticket.noTiket}</p>
                   </div>
                 </div>
               </div>

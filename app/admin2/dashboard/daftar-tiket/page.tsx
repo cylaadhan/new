@@ -16,7 +16,7 @@ const ticketData = [
     jumlah: 2,
     total: 300000,
     status: "Menunggu",
-    tanggal: "6-7-2025, 11:30:53",
+    tanggal: "6-7-2025 11:30:53",
   },
   {
     kode: "PRTX-0753",
@@ -29,7 +29,7 @@ const ticketData = [
     jumlah: 2,
     total: 300000,
     status: "Lunas",
-    tanggal: "6-7-2025, 11:12:53",
+    tanggal: "6-7-2025 11:12:53",
   },
   {
     kode: "PRTX-0072",
@@ -399,16 +399,14 @@ export default function Page() {
                   <div className="flex-1 bg-gray-50 rounded-lg p-4 flex justify-between items-center">
                     {/* Info Tiket dan Pemesan */}
                     <div>
-                      <div className="flex items-center gap-1 pl-1.5">
+                      <div className="flex items-center gap-1">
                         <p className="font-mono text-sm text-gray-600">{item.tanggal}</p>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${getStatusClass(item.status)}`}>
                           {item.status}
                         </span>
                       </div>
                       <div className="mt-1">
-                        <div className="flex items-center gap-1">
-                          <p className="font-mono text-sm font-bold text-gray-700 px-1.5 py-0.5 rounded-md">{item.kode}</p>
-                        </div>
+                        <p className="font-mono text-sm font-bold text-gray-700 py-0.5 rounded-md">{item.kode}</p>
                         <p className="text-xl font-bold text-gray-900">{item.customer.nama}</p>
                         <p className="text-sm text-gray-500">{item.customer.email}</p>
                         <p className="text-sm text-gray-500">{item.customer.telp}</p>
@@ -426,18 +424,11 @@ export default function Page() {
                   </div>
 
                   {/* Bagian Kanan - Aksi */}
-                  <div className="md:w-52 bg-gray-50 rounded-lg p-3 flex flex-col justify-between">
-                    <div className="flex justify-start items-center gap-1 mt-2">
-                      <button className="p-1.5 text-blue-800 hover:bg-blue-100 hover:text-blue-900 rounded-full transition-colors" title="Edit">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-1.5 text-red-600 hover:bg-red-100 hover:text-red-800 rounded-full transition-colors" title="Hapus">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      <button className="p-1.5 text-cyan-600 hover:bg-cyan-100 hover:text-cyan-800 rounded-full transition-colors" title="Detail">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <div className="md:w-52 bg-gray-50 rounded-lg p-3 flex flex-col justify-center items-center">
+                    <button className="p-2 text-blue-700 hover:bg-blue-100 hover:text-blue-900 rounded-full transition-colors flex items-center gap-2" title="Daftar Tiket">
+                      <TicketIcon className="w-5 h-5" />
+                      <span className="font-medium">Daftar Tiket</span>
+                    </button>
                   </div>
                 </div>
               ))}

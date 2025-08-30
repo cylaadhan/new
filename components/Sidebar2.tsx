@@ -13,7 +13,8 @@ import {
   Wallet,
   CheckCircle,
   ScanLine,
-  BarChart2
+  BarChart2,
+  BookText
 } from "lucide-react";
 import Image from "next/image";
 
@@ -35,7 +36,7 @@ const menu = [
   {
     label: "Data Tiket",
     key: "data-tiket",
-    icon: <Ticket className="w-5 h-5" />,
+    icon: <BookText className="w-5 h-5" />,
     dropdown: [
       { label: "Daftar Tiket", key: "daftar-tiket", path: "/admin2/dashboard/daftar-tiket" },
       { label: "Penjualan Offline", key: "penjualan-offline", path: "/admin2/dashboard/penjualan-offline" },
