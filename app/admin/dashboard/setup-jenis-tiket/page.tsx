@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Menu } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 
 const data = [
@@ -12,6 +12,28 @@ const data = [
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Protix";
+
+ 
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); 
+    };
+
+    
+    checkIsMobile();
+
+   
+    window.addEventListener("resize", checkIsMobile);
+
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
 
   const handleEdit = (row: any) => {
     setEditData(row);
@@ -46,14 +68,60 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Setup Jenis Tiket & Harga</h1>
-            <p className="text-gray-600 mt-1">Atur jenis tiket dan harga untuk event Anda</p>
-          </div>
+      {/* Sidebar Desktop (hanya tampil di desktop) */}
+      {!isMobile && (
+        <Sidebar 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      )}
+      
+      {/* Header Mobile (hanya tampil di mobile) */}
+      {isMobile && (
+        <header className="fixed top-0 left-0 right-0 bg-white z-20 px-4 py-3 flex justify-between items-center border-b shadow-sm">
+          <button 
+            onClick={toggleMobileSidebar}
+            className="p-1.5 rounded-md hover:bg-gray-100"
+          >
+            <Menu className="h-6 w-6 text-gray-700" />
+          </button>
+          
+          <h1 className="text-xl font-bold text-center text-gray-800">{adminName}</h1>
+          
+          <div className="w-6"></div> 
+        </header>
+      )}
+      
+      {/* Sidebar Mobile (hanya muncul saat tombol hamburger diklik) */}
+      {isMobile && showMobileSidebar && (
+        <div className="fixed inset-0 z-30">
+          <Sidebar 
+            adminName={adminName} 
+            showMobileSidebar={showMobileSidebar} 
+            setShowMobileSidebar={setShowMobileSidebar} 
+          />
         </div>
+      )}
+      
+      <main className={`flex-1 ${isMobile ? 'mt-14 p-4' : 'p-8'}`}>
+        {/* Header Desktop */}
+        {!isMobile && (
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Setup Jenis Tiket & Harga</h1>
+              <p className="text-gray-600 mt-1">Atur jenis tiket dan harga untuk event Anda</p>
+            </div>
+          </div>
+        )}
+
+        {/* Header Mobile */}
+        {isMobile && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Setup Jenis Tiket</h1>
+            <p className="text-gray-500 text-sm mt-1">Atur jenis tiket dan harga untuk event Anda</p>
+          </div>
+        )}
 
         {/* Tombol Tambah */}
         <div className="mb-6">
@@ -70,7 +138,7 @@ export default function Page() {
         </div>
 
         {/* Box-box Jenis Tiket */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map((tiket) => (
             <div key={tiket.no} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
               <div className="flex justify-between items-start mb-4">
@@ -97,12 +165,12 @@ export default function Page() {
                 </div>
               </div>
               
-              <div className="flex justify-between mt-4">
+              <div className="flex items-center gap-4 mt-4">
                 <div>
                   <p className="text-xs text-gray-500 font-medium">HARGA</p>
                   <p className="text-gray-800 font-medium">{formatRupiah(tiket.harga)}</p>
                 </div>
-                <div>
+                <div className="">
                   <p className="text-xs text-gray-500 font-medium">KUOTA</p>
                   <p className="text-gray-800 font-medium">{tiket.kuota} tiket</p>
                 </div>
@@ -114,7 +182,7 @@ export default function Page() {
         {/* Modal Tambah/Edit Pop Up */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl mx-4 relative animate-fadeIn">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
                 onClick={() => setShowModal(false)}

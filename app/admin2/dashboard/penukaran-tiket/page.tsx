@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Sidebar2 from "../../../../components/Sidebar2";
-import { Search, RefreshCw, Download, QrCode, ScanLine, ChevronLeft, ChevronRight, Eye, EyeOff, CheckCircle, TicketIcon, Calendar } from "lucide-react";
+import { Search, RefreshCw, Download, QrCode, ScanLine, ChevronLeft, ChevronRight, Eye, EyeOff, CheckCircle, TicketIcon, Calendar, Menu } from "lucide-react";
 
 // Data dummy untuk tabel
 const dummyData = [
@@ -158,6 +158,26 @@ export default function PenukaranTiketPage() {
   const [filterType, setFilterType] = useState("Semua Tipe");
   const [searchTableInput, setSearchTableInput] = useState("");
   
+  // State untuk mengelola tampilan mobile
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Panitia";
+  
+  // Deteksi ukuran layar untuk tampilan mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
+  
   // Pagination settings
   const itemsPerPage = 10;
   
@@ -294,201 +314,237 @@ export default function PenukaranTiketPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar2 adminName="Admin Tiket" />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Penukaran Tiket dan Gelang</h1>
-          </div>
-        </div>
-        
-        {/* Scan Tiket Section */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">Scan Tiket</h2>
-          
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Input dan Scan Button */}
-            <div className="w-full md:w-1/2">
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full border rounded-lg px-4 py-3 pr-12 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Masukkan kode tiket atau scan QR"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <button 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  onClick={handleSearch}
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-              </div>
-              
-              <button 
-                className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"
-                onClick={handleSearch}
-              >
-                <ScanLine className="h-5 w-5" />
-                Scan
-              </button>
-            </div>
+      {/* Sidebar dengan props yang diperlukan - hanya untuk desktop */}
+      <div className={`${isMobile ? 'hidden' : 'block'}`}>
+        <Sidebar2 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      </div>
+      
+      {/* Konten utama */}
+      <div className="flex-1">
+        {/* Header Mobile */}
+        {isMobile && (
+          <header className="sticky top-0 bg-white shadow-md z-20 px-4 py-3 flex items-center justify-between">
+            <button 
+              onClick={toggleMobileSidebar}
+              className="p-1 rounded-md text-gray-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
             
-            {/* Hasil Pencarian */}
-            <div className="w-full md:w-1/2 bg-gray-50 rounded-lg p-4">
-              <h3 className="font-bold text-gray-800 mb-3">Hasil Pencarian</h3>
-              
-              {searchResult ? (
-                <div className="space-y-2">
-                  <div className="flex">
-                    <div className="w-28 font-medium text-gray-800">Nama</div>
-                    <div className="w-4 text-right text-gray-800">:</div>
-                    <div className="flex-1 pl-2 text-gray-800">{searchResult.nama}</div>
-                  </div>
-                  <div className="flex">
-                    <div className="w-28 font-medium text-gray-800">Email</div>
-                    <div className="w-4 text-right text-gray-800">:</div>
-                    <div className="flex-1 pl-2 text-gray-800">{searchResult.email}</div>
-                  </div>
-                  <div className="flex">
-                    <div className="w-28 font-medium text-gray-800">Jenis Tiket</div>
-                    <div className="w-4 text-right text-gray-800">:</div>
-                    <div className="flex-1 pl-2 text-gray-800">{searchResult.jenisTiket}</div>
-                  </div>
-                  <div className="flex">
-                    <div className="w-28 font-medium text-gray-800">Harga</div>
-                    <div className="w-4 text-right text-gray-800">:</div>
-                    <div className="flex-1 pl-2 text-gray-800">{searchResult.harga}</div>
-                  </div>
-                  
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-gray-800 font-medium">{adminName}</div>
+            
+            {/* Elemen kosong untuk menyeimbangkan layout */}
+            <div className="w-6"></div>
+          </header>
+        )}
+        
+        {/* Mobile Sidebar */}
+        {isMobile && (
+          <Sidebar2 
+            adminName={adminName} 
+            showMobileSidebar={showMobileSidebar} 
+            setShowMobileSidebar={setShowMobileSidebar} 
+          />
+        )}
+        
+        <div className="p-4 md:p-8">
+          <div className="flex justify-between items-center mb-4 md:mb-8">
+            <div>
+              <h1 className="text-xl md:text-3xl font-bold text-gray-800">Penukaran Tiket dan Gelang</h1>
+            </div>
+          </div>
+          
+          {/* Scan Tiket Section */}
+          <div className="bg-white rounded-xl shadow-md p-4 md:p-6 mb-4 md:mb-6">
+            <h2 className="text-base md:text-lg font-bold mb-3 md:mb-4 text-gray-800">Scan Tiket</h2>
+            
+            <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+              {/* Input dan Scan Button */}
+              <div className="w-full md:w-1/2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full border rounded-lg px-3 py-2 md:px-4 md:py-3 pr-12 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Masukkan kode tiket atau scan QR"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
                   <button 
-                    className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow transition"
-                    onClick={handleScan}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    onClick={handleSearch}
                   >
-                    Simpan
+                    <Search className="h-4 w-4 md:h-5 md:w-5" />
                   </button>
                 </div>
-              ) : (
-                <div className="text-gray-500 italic">Belum ada hasil pencarian</div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Filter dan Pencarian */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          {/* Search Bar */}
-          <div className="relative flex-grow max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Cari nomor tiket, nama, atau email..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-              value={searchTableInput}
-              onChange={(e) => setSearchTableInput(e.target.value)}
-            />
-          </div>
-
-          {/* Filter dan Aksi */}
-          <div className="flex items-center gap-4">
-            {/* Filter Tipe */}
-            <select 
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option>Semua Tipe</option>
-              <option>Early Bird</option>
-              <option>Presale 1</option>
-              <option>Presale 2</option>
-              <option>Presale 3</option>
-              <option>VIP</option>
-            </select>
-
-            {/* Tombol Refresh */}
-            <button
-              onClick={handleRefresh}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
-            >
-              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-
-            {/* Total Tiket */}
-            <div className="px-4 py-2 text-gray-600 font-medium">
-              Total: {filteredTickets.length} tiket
-            </div>
-          </div>
-        </div>
-        
-        {/* Card Tiket yang Sudah Di-scan - Menggantikan Tabel */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Tiket yang Sudah Ditukar</h2>
-          
-          <div className="grid grid-cols-2 gap-4">  
-            {currentTickets.map((ticket, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-4">
-                {/* Info Tiket dalam Satu Bagian */}
-                <div className="flex justify-between items-center">
-                  {/* Info Pemesan */}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm text-gray-600">{ticket.tanggalScan}</p>
-                      <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-md">Ditukar</span>
+                
+                <button 
+                  className="w-full mt-3 md:mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 md:py-3 px-3 md:px-4 rounded-lg shadow transition flex items-center justify-center gap-2"
+                  onClick={handleSearch}
+                >
+                  <ScanLine className="h-4 w-4 md:h-5 md:w-5" />
+                  Scan
+                </button>
+              </div>
+              
+              {/* Hasil Pencarian */}
+              <div className="w-full md:w-1/2 bg-gray-50 rounded-lg p-3 md:p-4">
+                <h3 className="font-bold text-gray-800 mb-2 md:mb-3 text-sm md:text-base">Hasil Pencarian</h3>
+                
+                {searchResult ? (
+                  <div className="space-y-1 md:space-y-2">
+                    <div className="flex">
+                      <div className="w-20 md:w-28 font-medium text-gray-800 text-sm md:text-base">Nama</div>
+                      <div className="w-4 text-right text-gray-800 text-sm md:text-base">:</div>
+                      <div className="flex-1 pl-2 text-gray-800 text-sm md:text-base">{searchResult.nama}</div>
                     </div>
-                    <div className="mt-2">
-                      <p className="text-xl font-bold text-gray-900">{ticket.namaPemesan}</p>
-                      <p className="text-sm text-gray-500">{ticket.email}</p>
+                    <div className="flex">
+                      <div className="w-20 md:w-28 font-medium text-gray-800 text-sm md:text-base">Email</div>
+                      <div className="w-4 text-right text-gray-800 text-sm md:text-base">:</div>
+                      <div className="flex-1 pl-2 text-gray-800 text-sm md:text-base">{searchResult.email}</div>
                     </div>
+                    <div className="flex">
+                      <div className="w-20 md:w-28 font-medium text-gray-800 text-sm md:text-base">Jenis Tiket</div>
+                      <div className="w-4 text-right text-gray-800 text-sm md:text-base">:</div>
+                      <div className="flex-1 pl-2 text-gray-800 text-sm md:text-base">{searchResult.jenisTiket}</div>
+                    </div>
+                    <div className="flex">
+                      <div className="w-20 md:w-28 font-medium text-gray-800 text-sm md:text-base">Harga</div>
+                      <div className="w-4 text-right text-gray-800 text-sm md:text-base">:</div>
+                      <div className="flex-1 pl-2 text-gray-800 text-sm md:text-base">{searchResult.harga}</div>
+                    </div>
+                    
+                    <button 
+                      className="w-full mt-3 md:mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-1.5 md:py-2 px-3 md:px-4 rounded shadow transition text-sm md:text-base"
+                      onClick={handleScan}
+                    >
+                      Simpan
+                    </button>
                   </div>
+                ) : (
+                  <div className="text-gray-500 italic text-sm md:text-base">Belum ada hasil pencarian</div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Filter dan Pencarian */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mb-4 md:mb-8">
+            {/* Search Bar */}
+            <div className="relative flex-grow max-w-full md:max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cari nomor tiket, nama, atau email..."
+                className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base"
+                value={searchTableInput}
+                onChange={(e) => setSearchTableInput(e.target.value)}
+              />
+            </div>
 
-                  {/* Info Tiket */}
-                  <div className="text-right">
-                    <span className={`px-2 py-1 text-sm font-bold rounded-md ${getTipeClass(ticket.jenisTiket)}`}>
-                      {ticket.jenisTiket}
-                    </span>
-                    <p className="text-base font-medium text-gray-700 mt-1 font-mono">{ticket.noTiket}</p>
+            {/* Filter dan Aksi */}
+            <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+              {/* Filter Tipe */}
+              <select 
+                className="border border-gray-300 rounded-lg px-3 md:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option>Semua Tipe</option>
+                <option>Early Bird</option>
+                <option>Presale 1</option>
+                <option>Presale 2</option>
+                <option>Presale 3</option>
+                <option>VIP</option>
+              </select>
+
+              {/* Tombol Refresh */}
+              <button
+                onClick={handleRefresh}
+                className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900 text-sm md:text-base"
+              >
+                <RefreshCw className={`h-4 w-4 md:h-5 md:w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+
+              {/* Total Tiket */}
+              <div className="px-3 md:px-4 py-2 text-gray-600 font-medium text-sm md:text-base">
+                Total: {filteredTickets.length} tiket
+              </div>
+            </div>
+          </div>
+          
+          {/* Card Tiket yang Sudah Di-scan - Menggantikan Tabel */}
+          <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
+            <h2 className="text-base md:text-lg font-bold mb-3 md:mb-4 text-gray-800">Daftar Tiket yang Sudah Ditukar</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">  
+              {currentTickets.map((ticket, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-3 md:p-4">
+                  {/* Info Tiket dalam Satu Bagian */}
+                  <div className="flex justify-between items-center"> 
+                    {/* Info Pemesan */}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-xs md:text-sm text-gray-600">{ticket.tanggalScan}</p>
+                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-1.5 md:px-2 py-0.5 md:py-1 rounded-md">Ditukar</span>
+                      </div>
+                      <div className="mt-1 md:mt-2">
+                        <p className="text-lg md:text-xl font-bold text-gray-900">{ticket.namaPemesan}</p>
+                        <p className="text-xs md:text-sm text-gray-500">{ticket.email}</p>
+                      </div>
+                    </div>
+                  
+                    {/* Info Tiket */}
+                    <div className="text-right"> 
+                      <span className={`px-1.5 md:px-2 py-0.5 md:py-1 text-xs md:text-sm font-bold rounded-md ${getTipeClass(ticket.jenisTiket)}`}>
+                        {ticket.jenisTiket}
+                      </span>
+                      <p className="text-sm md:text-base font-medium text-gray-700 mt-1 font-mono">{ticket.noTiket}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-600">
-            <span>Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTickets.length)} of {filteredTickets.length} entries</span>
-            <div className="flex items-center gap-1">
-              <button 
-                className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </button>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button 
-                  key={page}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
               ))}
-              
-              <button 
-                className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </button>
+            </div>
+            
+            {/* Pagination */}
+            <div className="flex flex-row justify-between items-center mt-4 text-xs md:text-sm text-gray-600">
+              <div>
+                <span>Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTickets.length)} of {filteredTickets.length} entries</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button 
+                  className={`px-3 py-1 rounded-l-lg border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'} font-medium flex items-center`}
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Prev
+                </button>
+                
+                <button 
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white"
+                >
+                  {currentPage}
+                </button>
+                
+                <button 
+                  className={`px-3 py-1 rounded-r-lg border border-gray-300 ${currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'} font-medium flex items-center`}
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

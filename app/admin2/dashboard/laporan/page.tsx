@@ -1,7 +1,7 @@
 "use client";
 import Sidebar2 from "../../../../components/Sidebar2";
 import { Line } from "react-chartjs-2";
-import { RefreshCw, FileText, Ticket, DollarSign, TrendingUp, FileCheck, BarChart2, Clock, Download, SlidersHorizontal } from "lucide-react";
+import { RefreshCw, FileText, Ticket, DollarSign, TrendingUp, FileCheck, BarChart2, Clock, Download, SlidersHorizontal, Menu } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -128,7 +128,35 @@ export default function Page() {
   const [endDate, setEndDate] = useState('2025-07-31');
   const [selectedStatus, setSelectedStatus] = useState('Semua Status');
   const [selectedType, setSelectedType] = useState('Semua Tipe');
-
+  
+  // Tambahkan state untuk mobile view
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Admin Event"; // Nama admin
+  
+  // Fungsi untuk toggle sidebar mobile
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
+  
+  // Deteksi ukuran layar untuk mobile view
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Cek saat komponen dimuat
+    checkIsMobile();
+    
+    // Tambahkan event listener untuk resize
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Cleanup event listener saat komponen unmount
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+  
   const [filteredTickets, setFilteredTickets] = useState(allTickets);
 
   useEffect(() => {
@@ -186,168 +214,212 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar2 adminName="Panitia" />
-      <main className="flex-1 p-8">
-        {/* Header dan Filter */}
-        <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800">Laporan</h1>
-            <p className="text-gray-500">Ringkasan data penjualan tiket</p>
+      {/* Sidebar - hanya untuk desktop */}
+      <div className={`${isMobile ? 'hidden' : 'block'}`}>
+        <Sidebar2 
+          adminName={adminName}
+          showMobileSidebar={showMobileSidebar}
+          setShowMobileSidebar={setShowMobileSidebar}
+        />
+      </div>
+      
+      {/* Mobile Sidebar - muncul saat tombol hamburger diklik */}
+      {isMobile && showMobileSidebar && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={toggleMobileSidebar}></div>
+          <div className="absolute left-0 top-0 h-full w-64 bg-white shadow-lg">
+            <Sidebar2 
+              adminName={adminName}
+              showMobileSidebar={showMobileSidebar}
+              setShowMobileSidebar={setShowMobileSidebar}
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilter(!showFilter)}
-              className="p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
-              aria-label="Toggle Filter"
+        </div>
+      )}
+      
+      {/* Konten utama */}
+      <div className="flex-1">
+        {/* Header Mobile */}
+        {isMobile && (
+          <header className="sticky top-0 bg-white shadow-md z-20 px-4 py-3 flex items-center justify-between">
+            <button 
+              onClick={toggleMobileSidebar}
+              className="p-1 rounded-md text-gray-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
             >
-              <SlidersHorizontal className="h-5 w-5" />
+              <Menu className="w-6 h-6" />
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              <RefreshCw className="h-4 w-4" /> Refresh
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-md transition">
-              <Download className="w-5 h-5" /> Export
-            </button>
-          </div>
-        </div>
-        {/* Filter Rentang Tanggal, Status, Tipe */}
-        {showFilter && (
-          <div className="bg-white rounded-xl shadow p-6 mb-6 flex flex-wrap gap-4 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-700 font-medium">Rentang Tanggal:</span>
-              <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={startDate} onChange={e => setStartDate(e.target.value)} />
-              <span className="text-gray-700 font-medium">sampai</span>
-              <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={endDate} onChange={e => setEndDate(e.target.value)} />
-            </div>
-            <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
-              <option>Semua Status</option>
-              <option>Lunas</option>
-              <option>Menunggu</option>
-            </select>
-            <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
-              <option>Semua Tipe</option>
-              <option>Early Bird</option>
-              <option>Presale 1</option>
-              <option>Presale 2</option>
-              <option>Presale 3</option>
-            </select>
-          </div>
+            
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-gray-800 font-medium">Laporan</div>
+            
+            {/* Elemen kosong untuk menyeimbangkan layout */}
+            <div className="w-6"></div>
+          </header>
         )}
-        {/* Card Statistik */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Total Tiket</p>
-              <p className="text-4xl font-bold text-gray-900">{totalTickets}</p>
-            </div>
-            <div className="bg-blue-500 text-white p-4 rounded-lg">
-              <Ticket className="h-7 w-7" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Total Revenue</p>
-              <p className="text-4xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString('id-ID')}</p>
-            </div>
-            <div className="bg-green-500 text-white p-4 rounded-lg">
-              <DollarSign className="h-7 w-7" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Rata-rata Harga</p>
-              <p className="text-4xl font-bold text-gray-900">Rp {averagePrice.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-            </div>
-            <div className="bg-purple-400 text-white p-4 rounded-lg">
-              <TrendingUp className="h-7 w-7" />
-            </div>
-          </div>
-        </div>
-        {/* Breakdown Tipe Tiket & Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Breakdown Tipe Tiket */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Breakdown Tipe Tiket</h2>
-              <BarChart2 className="text-gray-400 h-5 w-5" />
-            </div>
-            <div className="space-y-4">
-              {ticketTypeData.map((item) => (
-                <div key={item.type} className="flex items-center justify-between">
-                  <span className="text-gray-600">{item.type}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`${item.color} h-2.5 rounded-full`}
-                        style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                    <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
-                    <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString('id-ID')})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Breakdown Status */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Breakdown Status</h2>
-              <Clock className="text-gray-400 h-5 w-5" />
-            </div>
-            <div className="space-y-4">
-              {ticketStatusData.map((item) => (
-                <div key={item.status} className="flex items-center justify-between">
-                  <span className="text-gray-600">{item.status}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`${item.color} h-2.5 rounded-full`}
-                        style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                    <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
-                    <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString('id-ID')})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         
-        {/* Grafik */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Estimasi Tiket Terjual */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Penjualan Tiket</h2>
-              <Ticket className="text-gray-400 h-5 w-5" />
+        {/* Konten halaman */}
+        <div className="p-4 md:p-8">
+          {/* Header dan Filter */}
+          <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">Laporan</h1>
+              <p className="text-gray-500">Ringkasan data penjualan tiket</p>
             </div>
-            <Line data={dataTiket} options={options} height={220} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-blue-600 font-bold">340 Tiket</span></div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFilter(!showFilter)}
+                className="p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
+                aria-label="Toggle Filter"
+              >
+                <SlidersHorizontal className="h-5 w-5" />
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
+                <RefreshCw className="h-4 w-4" /> Refresh
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-md transition">
+                <Download className="w-5 h-5" /> Export
+              </button>
+            </div>
           </div>
-          {/* Estimasi Pendapatan */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Pendapatan</h2>
-              <DollarSign className="text-gray-400 h-5 w-5" />
+          {/* Filter Rentang Tanggal, Status, Tipe */}
+          {showFilter && (
+            <div className="bg-white rounded-xl shadow p-6 mb-6 flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-700 font-medium">Rentang Tanggal:</span>
+                <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <span className="text-gray-700 font-medium">sampai</span>
+                <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              </div>
+              <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                <option>Semua Status</option>
+                <option>Lunas</option>
+                <option>Menunggu</option>
+              </select>
+              <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+                <option>Semua Tipe</option>
+                <option>Early Bird</option>
+                <option>Presale 1</option>
+                <option>Presale 2</option>
+                <option>Presale 3</option>
+              </select>
             </div>
-            <Line data={dataPendapatan} options={options} height={220} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-green-600 font-bold">Rp 20.400.000</span></div>
+          )}
+          {/* Card Statistik */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Total Tiket</p>
+                <p className="text-4xl font-bold text-gray-900">{totalTickets}</p>
+              </div>
+              <div className="bg-blue-500 text-white p-4 rounded-lg">
+                <Ticket className="h-7 w-7" />
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Total Revenue</p>
+                <p className="text-4xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString('id-ID')}</p>
+              </div>
+              <div className="bg-green-500 text-white p-4 rounded-lg">
+                <DollarSign className="h-7 w-7" />
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Rata-rata Harga</p>
+                <p className="text-4xl font-bold text-gray-900">Rp {averagePrice.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              </div>
+              <div className="bg-purple-400 text-white p-4 rounded-lg">
+                <TrendingUp className="h-7 w-7" />
+              </div>
+            </div>
+          </div>
+          {/* Breakdown Tipe Tiket & Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Breakdown Tipe Tiket */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800">Breakdown Tipe Tiket</h2>
+                <BarChart2 className="text-gray-400 h-5 w-5" />
+              </div>
+              <div className="space-y-4">
+                {ticketTypeData.map((item) => (
+                  <div key={item.type} className="flex items-center justify-between">
+                    <span className="text-gray-600">{item.type}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className={`${item.color} h-2.5 rounded-full`}
+                          style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
+                      <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString('id-ID')})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Breakdown Status */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800">Breakdown Status</h2>
+                <Clock className="text-gray-400 h-5 w-5" />
+              </div>
+              <div className="space-y-4">
+                {ticketStatusData.map((item) => (
+                  <div key={item.status} className="flex items-center justify-between">
+                    <span className="text-gray-600">{item.status}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className={`${item.color} h-2.5 rounded-full`}
+                          style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
+                      <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString('id-ID')})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Grafik */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Estimasi Tiket Terjual */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800">Penjualan Tiket</h2>
+                <Ticket className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataTiket} options={options} height={220} />
+              <div className="mt-4 text-gray-800">Total: <span className="text-blue-600 font-bold">340 Tiket</span></div>
+            </div>
+            {/* Estimasi Pendapatan */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800">Pendapatan</h2>
+                <DollarSign className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataPendapatan} options={options} height={220} />
+              <div className="mt-4 text-gray-800">Total: <span className="text-green-600 font-bold">Rp 20.400.000</span></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Jumlah Tiket Ditukarkan */}
+            <div className="bg-white rounded-xl shadow p-6 md:col-span-1">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800">Tiket Ditukarkan</h2>
+                <FileCheck className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataTukar} options={options} height={180} />
+              <div className="mt-4 text-gray-800">Total: <span className="text-orange-600 font-bold">135 Tiket</span></div>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* Jumlah Tiket Ditukarkan */}
-          <div className="bg-white rounded-xl shadow p-6 md:col-span-1">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Tiket Ditukarkan</h2>
-              <FileCheck className="text-gray-400 h-5 w-5" />
-            </div>
-            <Line data={dataTukar} options={options} height={180} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-orange-600 font-bold">135 Tiket</span></div>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

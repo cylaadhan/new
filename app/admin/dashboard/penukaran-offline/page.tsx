@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "../../../../components/Sidebar";
-import { Search, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { Search, RefreshCw, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { useState, useEffect } from "react";
 
 // Data dummy dengan jenis tiket yang diminta
 const data = [
@@ -30,10 +30,34 @@ export default function Page() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [adminName] = useState("Protix");
   
   // Pagination settings
   const indexOfLastItem = currentPage * entriesPerPage;
   const indexOfFirstItem = indexOfLastItem - entriesPerPage;
+
+  // Deteksi ukuran layar untuk mobile view
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Cek saat komponen dimuat
+    checkIsMobile();
+
+    // Tambahkan event listener untuk resize
+    window.addEventListener("resize", checkIsMobile);
+
+    // Cleanup event listener saat komponen unmount
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+  // Toggle sidebar mobile
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
 
   // Fungsi untuk mendapatkan kelas warna berdasarkan tipe tiket
   const getTipeClass = (tipe: string) => {
@@ -79,25 +103,62 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Penukaran Tiket & Gelang</h1>
-            <p className="text-gray-600 mt-1">Daftar tiket yang telah ditukarkan dengan gelang</p>
+      <Sidebar 
+        adminName={adminName} 
+        showMobileSidebar={showMobileSidebar} 
+        setShowMobileSidebar={setShowMobileSidebar} 
+      />
+      
+      {/* Header Mobile */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 bg-white z-10 shadow-md">
+          <div className="flex items-center justify-between p-4">
+            <button
+              onClick={toggleMobileSidebar}
+              className="p-1 rounded-md hover:bg-gray-200"
+            >
+              <Menu className="h-6 w-6 text-gray-700" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-800">{adminName}</h1>
+            <div className="w-6"></div> {/* Spacer untuk menyeimbangkan layout */}
           </div>
-          
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
-          >
-            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
         </div>
+      )}
+      
+      <main className={`flex-1 ${isMobile ? 'pt-20 px-2 pb-4' : 'p-8'}`}>
+        {!isMobile && (
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Penukaran Tiket & Gelang</h1>
+              <p className="text-gray-600 mt-1">Daftar tiket yang telah ditukarkan dengan gelang</p>
+            </div>
+            
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+        )}
         
-        {/* Filter dan Pencarian */}
-        <div className="flex flex-wrap items-center gap-4 mb-8">
+        {/* Judul Halaman untuk Mobile */}
+        {isMobile && (
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">Penukaran Tiket & Gelang</h1>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900 bg-white shadow-sm"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm">Refresh</span>
+            </button>
+          </div>
+        )}
+        
+        {/* Filter dan Pencarian - Responsif */}
+        <div className={`flex flex-wrap items-center gap-4 ${isMobile ? 'mb-4' : 'mb-8'}`}>
           <div className="relative flex-grow max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -109,58 +170,83 @@ export default function Page() {
             />
           </div>
 
-          {/* Show Entries dan Total Tiket di kanan */}
-          <div className="flex items-center gap-4 ml-auto">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Show</span>
-              <select 
-                className="border border-gray-300 text-gray-700 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-gray-600">entries</span>
+          {/* Show Entries dan Total Tiket - Responsif */}
+          {isMobile ? (
+            <div className="w-full flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Show</span>
+                <select 
+                  className="border border-gray-300 text-gray-700 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={entriesPerPage}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-gray-600">entries</span>
+              </div>
+              
+              <div className="text-gray-600 font-medium text-right">
+                Total: {filteredData.length} tiket
+              </div>
             </div>
+          ) : (
+            // Desktop layout tetap sama
+            <div className="flex items-center gap-4 ml-auto">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Show</span>
+                <select 
+                  className="border border-gray-300 text-gray-700 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={entriesPerPage}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-gray-600">entries</span>
+              </div>
 
-            <div className="px-4 py-2 text-gray-600 font-medium">
-              Total: {filteredData.length} tiket
+              <div className="text-gray-600 font-medium">
+                Total: {filteredData.length} tiket
+              </div>
             </div>
-          </div>
+          )}
         </div>
         
-        {/* Box Penukaran Tiket - Menggantikan Tabel */}
-        <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all duration-300 ease-in-out">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Daftar Tiket yang Sudah Ditukar</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
-            {currentItems.length > 0 ? (
+       
+
+        {/* Box Daftar Tiket yang sudah ditukar */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mt-6 overflow-hidden w-full max-w-none mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+            {filteredData.length > 0 ? (
               currentItems.map((ticket, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                <div key={index} className="bg-gray-50 rounded-lg p-5 hover:shadow-md transition-all duration-200 w-full">
                   {/* Info Tiket dalam Satu Bagian */}
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center w-full gap-3">
                     {/* Info Pemesan */}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-mono text-sm text-gray-600">{ticket.scan}</p>
-                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-md">Ditukar</span>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <p className="font-mono text-sm text-gray-600 whitespace-nowrap">{ticket.scan}</p>
+                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-md whitespace-nowrap">Ditukar</span>
                       </div>
                       <div className="mt-2">
-                        <p className="text-xl font-bold text-gray-900">{ticket.nama}</p>
-                        <p className="text-sm text-gray-500">{ticket.email}</p>
+                        <p className="text-xl font-bold text-gray-900 truncate">{ticket.nama}</p>
+                        <p className="text-sm text-gray-500 truncate">{ticket.email}</p>
                       </div>
                     </div>
 
                     {/* Info Tiket */}
-                    <div className="text-right">
+                    <div className="text-right min-w-[120px]">
                       <span className={`px-2 py-1 text-sm font-bold rounded-md ${getTipeClass(ticket.jenis)}`}>
                         {ticket.jenis}
                       </span>
@@ -177,36 +263,32 @@ export default function Page() {
             )}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-6">
-            <div className="text-sm text-gray-600">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
-            </div>
+          {/* Pagination - Responsif */}
+          <div className={`${isMobile ? 'flex justify-end' : 'flex justify-between items-center'} mt-6`}>
+            {!isMobile && (
+              <div className="text-sm text-gray-600">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+              </div>
+            )}
             
             <div className="flex items-center gap-1">
               <button 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                className={`px-2 py-1 rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center text-sm`}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
+                Prev
               </button>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button 
-                  key={page}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white">
+                {currentPage}
+              </div>
               
               <button 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === totalPages || totalPages === 0 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                className={`px-2 py-1 rounded-full border border-gray-300 ${currentPage === totalPages || totalPages === 0 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center text-sm`}
               >
                 Next
                 <ChevronRight className="h-4 w-4 ml-1" />

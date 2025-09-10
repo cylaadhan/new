@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaTimes, FaSave } from "react-icons/fa";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Menu } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 
 const data = [
@@ -14,10 +14,33 @@ const data = [
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [adminName] = useState("Protix");
+
+  // Deteksi ukuran layar untuk mobile view
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px adalah breakpoint untuk tampilan mobile
+    };
+
+    // Cek saat komponen dimuat
+    checkIsMobile();
+
+    // Tambahkan event listener untuk resize
+    window.addEventListener("resize", checkIsMobile);
+
+    // Cleanup event listener saat komponen unmount
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   const handleEdit = (row: any) => {
     setEditData(row);
     setShowModal(true);
+  };
+
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
   };
 
   // Fungsi untuk mendapatkan kelas warna berdasarkan tipe tiket
@@ -40,14 +63,58 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-8">
+      {/* Sidebar Desktop (hanya tampil di desktop) */}
+      {!isMobile && (
+        <Sidebar 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      )}
+      
+      {/* Header Mobile (hanya tampil di mobile) */}
+      {isMobile && (
+        <header className="fixed top-0 left-0 right-0 bg-white z-20 px-4 py-3 flex justify-between items-center border-b shadow-sm">
+          <button 
+            onClick={toggleMobileSidebar}
+            className="p-1.5 rounded-md hover:bg-gray-100"
+          >
+            <Menu className="h-6 w-6 text-gray-700" />
+          </button>
+          
+          <h1 className="text-xl font-bold text-center text-gray-800">{adminName}</h1>
+          
+          <div className="w-6"></div> 
+        </header>
+      )}
+      
+      {/* Sidebar Mobile (hanya muncul saat tombol hamburger diklik) */}
+      {isMobile && showMobileSidebar && (
+        <div className="fixed inset-0 z-30">
+          <Sidebar 
+            adminName={adminName} 
+            showMobileSidebar={showMobileSidebar} 
+            setShowMobileSidebar={setShowMobileSidebar} 
+          />
+        </div>
+      )}
+
+      <main className={`flex-1 p-4 md:p-8 ${isMobile ? 'mt-14' : ''}`}>
+        {/* Header Desktop */}
+        <div className={`${isMobile ? 'hidden' : 'flex'} justify-between items-center mb-8`}>
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Setup Periode Sale</h1>
             <p className="text-gray-600 mt-1">Atur periode penjualan tiket untuk event Anda</p>
           </div>
         </div>
+
+        {/* Header Mobile */}
+        {isMobile && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Setup Periode Sale</h1>
+            <p className="text-gray-600 text-sm mt-1">Atur periode penjualan tiket untuk event Anda</p>
+          </div>
+        )}
 
         {/* Tombol Tambah */}
         <div className="mb-6">
@@ -64,9 +131,9 @@ export default function Page() {
         </div>
 
         {/* Box-box Periode Sale */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {data.map((periode) => (
-            <div key={periode.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+            <div key={periode.id} className="bg-white rounded-xl shadow-md p-4 md:p-6 hover:shadow-lg transition">
               <div className="flex justify-between items-start mb-4">
                 <span className={`text-xs font-medium px-3 py-1 rounded-full ${getTipeClass(periode.nama)}`}>
                   {periode.nama}
@@ -82,7 +149,7 @@ export default function Page() {
                 {/* Ikon trash dihapus dari sini */}
               </div>
               
-              <div className="flex gap-8 mt-4">
+              <div className="flex gap-4 md:gap-8 mt-4">
                 <div>
                   <p className="text-xs text-gray-500 font-medium">PERIODE AWAL</p>
                   <p className="text-gray-800 font-medium">{periode.mulai}</p>
@@ -99,7 +166,7 @@ export default function Page() {
         {/* Modal Tambah/Edit Pop Up */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xl relative animate-fadeIn">
+            <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 w-full max-w-xl mx-4 relative animate-fadeIn">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
                 onClick={() => setShowModal(false)}

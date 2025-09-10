@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -23,7 +23,24 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+
+  // Deteksi ukuran layar untuk responsivitas
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Set nilai awal
+    checkIsMobile();
+    
+    // Tambahkan event listener untuk resize
+    window.addEventListener("resize", checkIsMobile);
+    
+    // Cleanup event listener
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,9 +74,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="w-full max-w-4xl flex overflow-hidden rounded-2xl shadow-2xl">
-        {/* Bagian Kiri - Gambar */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-6">
+      <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-4xl'} flex flex-col md:flex-row overflow-hidden rounded-2xl shadow-2xl`}>
+        {/* Bagian Kiri - Gambar (hanya tampil di desktop) */}
         <div className="hidden md:block w-1/2 bg-blue-600 p-8 relative">
           <div className="absolute inset-0 bg-black opacity-20"></div>
           <div className="relative z-10 h-full flex flex-col justify-between text-white">
@@ -82,20 +99,32 @@ export default function LoginPage() {
         </div>
         
         {/* Bagian Kanan - Form Login */}
-        <div className="w-full md:w-1/2 bg-white p-8 md:p-12">
-          <div className="mb-8 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+        <div className="w-full md:w-1/2 bg-white p-6 md:p-12">
+          {/* Logo untuk tampilan mobile */}
+          {isMobile && (
+            <div className="mb-6 flex flex-col items-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-3">
                 <Image src="/lorg.png" alt="Logo" width={32} height={32} className="invert" />
               </div>
+              <h1 className="text-2xl font-bold text-gray-800">Protix.id</h1>
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">Login Admin</h1>
-            <p className="text-gray-500 mt-2">Please login to your account</p>
+          )}
+          
+          <div className="mb-6 text-center">
+            {!isMobile && (
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                  <Image src="/lorg.png" alt="Logo" width={32} height={32} className="invert" />
+                </div>
+              </div>
+            )}
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-gray-800`}>Login Admin</h1>
+            <p className="text-gray-500 mt-2 text-sm md:text-base">Please login to your account</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block mb-2 font-medium text-gray-700">Username</label>
+              <label className="block mb-2 font-medium text-gray-700 text-sm">Username</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -104,7 +133,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="text"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black text-sm md:text-base"
                   placeholder="Masukkan username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -114,7 +143,7 @@ export default function LoginPage() {
             </div>
             
             <div>
-              <label className="block mb-2 font-medium text-gray-700">Password</label>
+              <label className="block mb-2 font-medium text-gray-700 text-sm">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -123,7 +152,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black text-sm md:text-base"
                   placeholder="Masukkan password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -133,7 +162,7 @@ export default function LoginPage() {
             </div>
             
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-lg flex items-center">
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg flex items-center text-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
@@ -143,7 +172,7 @@ export default function LoginPage() {
             
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg text-sm md:text-base mt-2"
             >
               Masuk
             </button>

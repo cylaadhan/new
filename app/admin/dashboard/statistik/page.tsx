@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "../../../../components/Sidebar";
 import { Line } from "react-chartjs-2";
-import { RefreshCw, FileText, Ticket, DollarSign, TrendingUp, FileCheck, BarChart2, Clock, Download, SlidersHorizontal } from "lucide-react";
+import { RefreshCw, FileText, Ticket, DollarSign, TrendingUp, FileCheck, BarChart2, Clock, Download, SlidersHorizontal, Menu } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -140,8 +140,29 @@ export default function Page() {
   const [endDate, setEndDate] = useState('2025-07-31');
   const [selectedStatus, setSelectedStatus] = useState('Semua Status');
   const [selectedType, setSelectedType] = useState('Semua Tipe');
+  
+  // State untuk deteksi mobile dan kontrol sidebar
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Protix";
 
   const [filteredTickets, setFilteredTickets] = useState(allTickets);
+
+  // Deteksi ukuran layar untuk mobile view
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px adalah breakpoint untuk tampilan mobile
+    };
+
+    // Cek saat komponen dimuat
+    checkIsMobile();
+
+    // Tambahkan event listener untuk resize
+    window.addEventListener("resize", checkIsMobile);
+
+    // Cleanup event listener saat komponen unmount
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   useEffect(() => {
     const filtered = allTickets.filter(ticket => {
@@ -199,168 +220,241 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar adminName="Pemilik Event" />
-      <main className="flex-1 p-8">
-        {/* Header dan Filter */}
-        <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800">Laporan</h1>
-            <p className="text-gray-500">Ringkasan data penjualan tiket</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilter(!showFilter)}
-              className="p-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition"
-              aria-label="Toggle Filter"
+      {/* Sidebar Desktop (hanya tampil di desktop) */}
+      {!isMobile && (
+        <Sidebar 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      )}
+      
+      {/* Sidebar Mobile (hanya muncul saat tombol hamburger diklik) */}
+      {isMobile && showMobileSidebar && (
+        <div className="fixed inset-0 z-30">
+          <Sidebar 
+            adminName={adminName} 
+            showMobileSidebar={showMobileSidebar} 
+            setShowMobileSidebar={setShowMobileSidebar} 
+          />
+        </div>
+      )}
+      
+      <div className="flex-1">
+        {/* Header Mobile */}
+        {isMobile && (
+          <header className="fixed top-0 left-0 right-0 bg-white z-20 px-4 py-3 flex justify-between items-center border-b shadow-sm">
+            <button 
+              onClick={() => setShowMobileSidebar(true)}
+              className="p-1.5 rounded-md hover:bg-gray-100"
             >
-              <SlidersHorizontal className="h-5 w-5" />
+              <Menu className="h-6 w-6 text-gray-700" />
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
-              <RefreshCw className="h-4 w-4" /> Refresh
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-md transition">
-              <Download className="w-5 h-5" /> Export
-            </button>
-          </div>
-        </div>
-        {/* Filter Rentang Tanggal, Status, Tipe */}
-        {showFilter && (
-          <div className="bg-white rounded-xl shadow p-6 mb-6 flex flex-wrap gap-4 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-700 font-medium">Rentang Tanggal:</span>
-              <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={startDate} onChange={e => setStartDate(e.target.value)} />
-              <span className="text-gray-700 font-medium">sampai</span>
-              <input type="date" className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={endDate} onChange={e => setEndDate(e.target.value)} />
-            </div>
-            <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
-              <option>Semua Status</option>
-              <option>Lunas</option>
-              <option>Menunggu</option>
-            </select>
-            <select className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
-              <option>Semua Tipe</option>
-              <option>Early Bird</option>
-              <option>Presale 1</option>
-              <option>Presale 2</option>
-              <option>Presale 3</option>
-            </select>
-          </div>
+            
+            <h1 className="text-xl font-bold text-center text-gray-800">{adminName}</h1>
+            
+            <div className="w-6"></div>
+          </header>
         )}
-        {/* Card Statistik */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Total Tiket</p>
-              <p className="text-4xl font-bold text-gray-900">{totalTickets}</p>
-            </div>
-            <div className="bg-blue-500 text-white p-4 rounded-lg">
-              <Ticket className="h-7 w-7" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Total Revenue</p>
-              <p className="text-4xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString()}</p>
-            </div>
-            <div className="bg-green-500 text-white p-4 rounded-lg">
-              <DollarSign className="h-7 w-7" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow p-6 flex justify-between items-center">
-            <div>
-              <p className="text-gray-500">Rata-rata Harga</p>
-              <p className="text-4xl font-bold text-gray-900">Rp {averagePrice.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-            </div>
-            <div className="bg-purple-400 text-white p-4 rounded-lg">
-              <TrendingUp className="h-7 w-7" />
-            </div>
-          </div>
-        </div>
-        {/* Breakdown Tipe Tiket & Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Breakdown Tipe Tiket */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Breakdown Tipe Tiket</h2>
-              <BarChart2 className="text-gray-400 h-5 w-5" />
-            </div>
-            <div className="space-y-4">
-              {ticketTypeData.map((item) => (
-                <div key={item.type} className="flex items-center justify-between">
-                  <span className="text-gray-600">{item.type}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`${item.color} h-2.5 rounded-full`}
-                        style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                    <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
-                    <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString()})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Breakdown Status */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Breakdown Status</h2>
-              <Clock className="text-gray-400 h-5 w-5" />
-            </div>
-            <div className="space-y-4">
-              {ticketStatusData.map((item) => (
-                <div key={item.status} className="flex items-center justify-between">
-                  <span className="text-gray-600">{item.status}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`${item.color} h-2.5 rounded-full`}
-                        style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                    <span className="font-medium text-gray-800 w-4 text-right">{item.count}</span>
-                    <span className="text-gray-500 text-sm w-24 text-right">(Rp {item.amount.toLocaleString()})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         
-        {/* Grafik */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Estimasi Tiket Terjual */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Penjualan Tiket</h2>
-              <Ticket className="text-gray-400 h-5 w-5" />
+
+        <main className={`flex-1 p-4 md:p-8 ${isMobile ? 'mt-14' : ''}`}>
+          {/* Judul Halaman Mobile dan Tombol */}
+          {isMobile && (
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">Statistik</h1>
+                  
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setShowFilter(!showFilter)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors text-sm"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </button>
+                  
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors text-sm">
+                    <Download className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
-            <Line data={dataTiket} options={options} height={220} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-blue-600 font-bold">340 Tiket</span></div>
-          </div>
-          {/* Estimasi Pendapatan */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Pendapatan</h2>
-              <DollarSign className="text-gray-400 h-5 w-5" />
+          )}
+          
+          {/* Header Desktop */}
+          <div className={`${isMobile ? 'hidden' : 'flex'} flex-wrap justify-between items-center mb-8 gap-4`}>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">Laporan</h1>
+              <p className="text-gray-500">Ringkasan data penjualan tiket</p>
             </div>
-            <Line data={dataPendapatan} options={options} height={220} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-green-600 font-bold">Rp 20.400.000</span></div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* Jumlah Tiket Ditukarkan */}
-          <div className="bg-white rounded-xl shadow p-6 md:col-span-1">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800">Tiket Ditukarkan</h2>
-              <FileCheck className="text-gray-400 h-5 w-5" />
+            
+            {/* Tombol filter dan download */}
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setShowFilter(!showFilter)}
+                className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filter
+              </button>
+              
+              <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
+                <Download className="h-4 w-4" />
+                Download
+              </button>
             </div>
-            <Line data={dataTukar} options={options} height={180} />
-            <div className="mt-4 text-gray-800">Total: <span className="text-orange-600 font-bold">135 Tiket</span></div>
           </div>
-        </div>
-      </main>
+          
+          {/* Konten halaman */}
+          {showFilter && (
+            <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-6 flex flex-wrap gap-4 items-center">
+              <div className="flex flex-col md:flex-row w-full md:w-auto items-start md:items-center gap-2">
+                <span className="text-gray-700 font-medium">Rentang Tanggal:</span>
+                <div className="flex flex-col md:flex-row w-full md:w-auto gap-2">
+                  <input type="date" className="w-full md:w-auto border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                  <span className="text-gray-700 font-medium hidden md:inline">sampai</span>
+                  <input type="date" className="w-full md:w-auto border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row w-full md:w-auto gap-2">
+                <select className="w-full md:w-auto border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                  <option>Semua Status</option>
+                  <option>Lunas</option>
+                  <option>Menunggu</option>
+                </select>
+                <select className="w-full md:w-auto border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+                  <option>Semua Tipe</option>
+                  <option>Early Bird</option>
+                  <option>Presale 1</option>
+                  <option>Presale 2</option>
+                  <option>Presale 3</option>
+                </select>
+              </div>
+            </div>
+          )}
+          
+          {/* Card Statistik */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Total Tiket</p>
+                <p className="text-2xl md:text-4xl font-bold text-gray-900">{totalTickets}</p>
+              </div>
+              <div className="bg-blue-500 text-white p-3 md:p-4 rounded-lg">
+                <Ticket className="h-6 w-6 md:h-7 md:w-7" />
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Total Revenue</p>
+                <p className="text-2xl md:text-4xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString()}</p>
+              </div>
+              <div className="bg-green-500 text-white p-3 md:p-4 rounded-lg">
+                <DollarSign className="h-6 w-6 md:h-7 md:w-7" />
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4 md:p-6 flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">Rata-rata Harga</p>
+                <p className="text-2xl md:text-4xl font-bold text-gray-900">Rp {averagePrice.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              </div>
+              <div className="bg-purple-400 text-white p-3 md:p-4 rounded-lg">
+                <TrendingUp className="h-6 w-6 md:h-7 md:w-7" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Breakdown Tipe Tiket & Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+            {/* Breakdown Tipe Tiket */}
+            <div className="bg-white rounded-xl shadow p-4 md:p-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="font-bold text-base md:text-lg text-gray-800">Breakdown Tipe Tiket</h2>
+                <BarChart2 className="text-gray-400 h-5 w-5" />
+              </div>
+              <div className="space-y-3 md:space-y-4">
+                {ticketTypeData.map((item) => (
+                  <div key={item.type} className="flex items-center justify-between">
+                    <span className="text-sm md:text-base text-gray-600">{item.type}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 md:w-24 bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className={`${item.color} h-2.5 rounded-full`}
+                          style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-medium text-gray-800 w-4 text-right text-sm md:text-base">{item.count}</span>
+                      <span className="text-gray-500 text-xs md:text-sm w-20 md:w-24 text-right">(Rp {item.amount.toLocaleString()})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Breakdown Status */}
+            <div className="bg-white rounded-xl shadow p-4 md:p-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="font-bold text-base md:text-lg text-gray-800">Breakdown Status</h2>
+                <Clock className="text-gray-400 h-5 w-5" />
+              </div>
+              <div className="space-y-3 md:space-y-4">
+                {ticketStatusData.map((item) => (
+                  <div key={item.status} className="flex items-center justify-between">
+                    <span className="text-sm md:text-base text-gray-600">{item.status}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 md:w-24 bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className={`${item.color} h-2.5 rounded-full`}
+                          style={{ width: `${totalTickets > 0 ? (item.count / totalTickets) * 100 : 0}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-medium text-gray-800 w-4 text-right text-sm md:text-base">{item.count}</span>
+                      <span className="text-gray-500 text-xs md:text-sm w-20 md:w-24 text-right">(Rp {item.amount.toLocaleString()})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Grafik */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* Estimasi Tiket Terjual */}
+            <div className="bg-white rounded-xl shadow p-4 md:p-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="font-bold text-base md:text-lg text-gray-800">Penjualan Tiket</h2>
+                <Ticket className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataTiket} options={options} height={isMobile ? 180 : 220} />
+              <div className="mt-3 md:mt-4 text-sm md:text-base text-gray-800">Total: <span className="text-blue-600 font-bold">340 Tiket</span></div>
+            </div>
+            
+            {/* Estimasi Pendapatan */}
+            <div className="bg-white rounded-xl shadow p-4 md:p-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="font-bold text-base md:text-lg text-gray-800">Pendapatan</h2>
+                <DollarSign className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataPendapatan} options={options} height={isMobile ? 180 : 220} />
+              <div className="mt-3 md:mt-4 text-sm md:text-base text-gray-800">Total: <span className="text-green-600 font-bold">Rp 20.400.000</span></div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
+            {/* Jumlah Tiket Ditukarkan */}
+            <div className="bg-white rounded-xl shadow p-4 md:p-6 md:col-span-1">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="font-bold text-base md:text-lg text-gray-800">Tiket Ditukarkan</h2>
+                <FileCheck className="text-gray-400 h-5 w-5" />
+              </div>
+              <Line data={dataTukar} options={options} height={isMobile ? 160 : 180} />
+              <div className="mt-3 md:mt-4 text-sm md:text-base text-gray-800">Total: <span className="text-orange-600 font-bold">135 Tiket</span></div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

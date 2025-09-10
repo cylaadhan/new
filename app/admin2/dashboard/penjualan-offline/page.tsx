@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar2 from "../../../../components/Sidebar2";
-import { Search, RefreshCw, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, RefreshCw, Trash2, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 
 // Interface untuk data form
 interface FormData {
@@ -149,35 +149,68 @@ const TICKET_TYPES = [
 ];
 
 export default function PenjualanOfflinePage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  // State untuk form
   const [formData, setFormData] = useState<FormData>({
     nama: "",
     noWa: "",
     email: "",
     jenisTicket: "",
     jumlahTicket: 1,
-    panitia: "Panitia event",
+    panitia: "Panitia Event",
   });
+  
+  // State untuk data penjualan
   const [salesData, setSalesData] = useState<SaleData[]>(DUMMY_SALES);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Pagination settings
+  // Deteksi ukuran layar untuk tampilan mobile
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Panitia";
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Cek saat komponen dimuat
+    checkIsMobile();
+    
+    // Tambahkan event listener untuk resize
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Cleanup event listener saat komponen unmount
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+  
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
+  
+  // Pengaturan paginasi
   const itemsPerPage = 5;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   
   // Filter data berdasarkan pencarian
-  const filteredData = salesData.filter(item =>
-    item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.noWa.includes(searchTerm)
-  );
+  const filteredData = salesData.filter(item => {
+    const searchTermLower = searchTerm.toLowerCase();
+    return (
+      item.nama.toLowerCase().includes(searchTermLower) ||
+      item.email.toLowerCase().includes(searchTermLower) ||
+      item.noWa.includes(searchTerm) ||
+      item.jenisTicket.toLowerCase().includes(searchTermLower)
+    );
+  });
   
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   
-  // Hitung harga berdasarkan jenis tiket yang dipilih
+  // Hitung total harga berdasarkan jenis tiket yang dipilih
   const selectedTicket = TICKET_TYPES.find(ticket => ticket.name === formData.jenisTicket);
   const ticketPrice = selectedTicket ? selectedTicket.price : 0;
   const totalPrice = ticketPrice * formData.jumlahTicket;
@@ -244,270 +277,326 @@ export default function PenjualanOfflinePage() {
         return "bg-gray-100 text-gray-800";
     }
   };
+  
   const formatTanggal = (tanggalStr: string) => {
     const [tanggal, waktu] = tanggalStr.split(' ');
     const [tahun, bulan, hari] = tanggal.split('-');
     return `${hari}-${bulan}-${tahun} ${waktu}`;
   };
+  
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar2 adminName="Admin Tiket" />
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Penjualan Offline</h1>
-        
-        {/* Form dan Rincian */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Form Pemesanan - 2 kolom pertama */}
-          <div className="md:col-span-2 bg-white rounded-xl shadow-sm p-6">
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                <input
-                  type="text"
-                  name="nama"
-                  value={formData.nama}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">No. WA</label>
-                <input
-                  type="text"
-                  name="noWa"
-                  value={formData.noWa}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket</label>
-                <input
-                  type="number"
-                  name="jumlahTicket"
-                  value={formData.jumlahTicket}
-                  onChange={handleInputChange}
-                  min="1"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Tiket</label>
-                <select
-                  name="jenisTicket"
-                  value={formData.jenisTicket}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                >
-                  <option value="">Pilih Jenis Tiket</option>
-                  {TICKET_TYPES.map(ticket => (
-                    <option key={ticket.id} value={ticket.name}>{ticket.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Panitia</label>
-                <input
-                  type="text"
-                  name="panitia"
-                  value={formData.panitia}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
-                  required
-                />
-              </div>
-              
-              <div className="md:col-span-2 flex justify-end mt-4">
-                <button 
-                  type="submit" 
-                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
-                >
-                  Pesan Sekarang
-                </button>
-              </div>
-            </form>
-          </div>
-          
-          {/* Rincian Pemesanan - kolom ketiga */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Rincian</h2>
-            <div className="space-y-3">
-              <div className="flex">
-                <span className="text-gray-600 w-32">Jenis Tiket</span>
-                <span className="text-gray-600 mr-2">:</span>
-                <span className="font-medium text-gray-700">{formData.jenisTicket || '-'}</span>
-              </div>
-              <div className="flex">
-                <span className="text-gray-600 w-32">Harga Satuan</span>
-                <span className="text-gray-600 mr-2">:</span>
-                <span className="font-medium text-gray-700">{ticketPrice ? `Rp ${ticketPrice.toLocaleString()}` : '-'}</span>
-
-              </div>
-              <div className="flex">
-                <span className="text-gray-600 w-32">Jumlah Tiket</span>
-                <span className="text-gray-600 mr-2">:</span>
-                <span className="font-medium text-gray-700">{formData.jumlahTicket}</span>
-
-              </div>
-              <div className="pt-2 mt-2 border-t border-gray-200">
-                <div className="flex">
-                  <span className="text-gray-700 font-medium w-32">Harga Total</span>
-                  <span className="text-gray-700 mr-2">:</span>
-                  <span className="font-semibold text-gray-700">{totalPrice ? `Rp ${totalPrice.toLocaleString()}` : '-'}</span>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Tabel Rekap Penjualan - Diubah menjadi format card */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Rekap Data Penjualan Offline</h2>
-          
-          <div className="flex items-center gap-4 mb-4 justify-between">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cari nama, email, atau no. WA"
-                className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80 text-black font-medium" // Diubah dari w-64 menjadi w-80
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 font-sans">
+      {/* Sidebar dengan props yang diperlukan - hanya untuk desktop */}
+      <div className={`${isMobile ? 'hidden' : 'block'}`}>
+        <Sidebar2 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      </div>
+      
+      {/* Konten utama */}
+      <div className="flex-1">
+        {/* Header Mobile */}
+        {isMobile && (
+          <header className="sticky top-0 bg-white shadow-md z-20 px-4 py-3 flex items-center justify-between">
+            <button 
+              onClick={toggleMobileSidebar}
+              className="p-1 rounded-md text-gray-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            <div className="flex-1 text-center">
+              <span className="font-bold text-lg text-black">{adminName}</span>
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* Tombol Refresh */}
-              <button
-                onClick={handleRefresh}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900"
-              >
-                <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
-
-              {/* Total Tiket */}
-              <div className="px-4 py-2 text-gray-600 font-medium">
-                Total: {filteredData.length} tiket
+            <div className="w-6"></div> {/* Spacer untuk menjaga keseimbangan layout */}
+          </header>
+        )}
+        
+        {/* Sidebar Mobile (hanya muncul saat tombol hamburger diklik) */}
+        {isMobile && showMobileSidebar && (
+          <div className="fixed inset-0 z-30">
+            <Sidebar2 
+              adminName={adminName} 
+              showMobileSidebar={showMobileSidebar} 
+              setShowMobileSidebar={setShowMobileSidebar} 
+            />
+          </div>
+        )}
+        
+        <main className={`${isMobile ? 'pt-0' : ''} flex-1 w-full flex flex-col min-h-screen`}>
+          <div className="flex-grow">
+            {/* Judul dan Export */}
+            <div className="flex justify-between items-center p-4 md:p-8 pb-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Penjualan Offline</h1>
               </div>
             </div>
-          </div>
-          
-          {/* Card Data */}
-          <div className="space-y-4">
-            {currentItems.map((item) => (
-              <div key={item.id} className="flex flex-col md:flex-row gap-2">
-                {/* Bagian Kiri - Informasi Utama */}
-                <div className="flex-1 bg-gray-50 rounded-lg p-4 flex justify-between items-center">
-                  {/* Info Pemesan */}
+            
+            {/* Form dan Rincian */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 px-4 md:px-8">
+              {/* Form Pemesanan - 2 kolom pertama */}
+              <div className="md:col-span-2 bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm text-gray-600">{formatTanggal(item.tanggalPemesanan)}</p>
-                      <span className={"text-xs font-semibold px-2 py-1 rounded-md " + getTipeClass(item.jenisTicket)}>
-                        {item.jenisTicket}
-                      </span>
-                    </div>
-                    <div className="mt-0.5">
-                      <p className="text-xl font-bold text-gray-900">{item.nama}</p>
-                      <p className="text-sm text-gray-500">{item.email}</p>
-                      <p className="text-sm text-gray-500">{item.noWa}</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                    <input
+                      type="text"
+                      name="nama"
+                      value={formData.nama}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">No. WA</label>
+                    <input
+                      type="text"
+                      name="noWa"
+                      value={formData.noWa}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Tiket</label>
+                    <input
+                      type="number"
+                      name="jumlahTicket"
+                      value={formData.jumlahTicket}
+                      onChange={handleInputChange}
+                      min="1"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Tiket</label>
+                    <select
+                      name="jenisTicket"
+                      value={formData.jenisTicket}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    >
+                      <option value="">Pilih Jenis Tiket</option>
+                      {TICKET_TYPES.map((ticket) => (
+                        <option key={ticket.name} value={ticket.name}>{ticket.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Panitia</label>
+                    <input
+                      type="text"
+                      name="panitia"
+                      value={formData.panitia}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black font-medium"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2 flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition shadow-sm"
+                    >
+                      Pesan Sekarang
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              {/* Rincian Harga - kolom ketiga */}
+              <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">Rincian Harga</h2>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Jenis Tiket</span>
+                    <span className="font-medium">{formData.jenisTicket || "-"}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Harga per Tiket</span>
+                    <span className="font-medium">{ticketPrice ? `Rp ${ticketPrice.toLocaleString()}` : "-"}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Jumlah Tiket</span>
+                    <span className="font-medium">{formData.jumlahTicket}</span>
+                  </div>
+                  
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-800 font-bold">Total</span>
+                      <span className="text-blue-600 font-bold">{totalPrice ? `Rp ${totalPrice.toLocaleString()}` : "-"}</span>
                     </div>
                   </div>
-
-                  {/* Info Tiket dan Pembayaran */}
-                  <div className="text-right">
-                    <p className={`text-base font-medium ${item.jenisTicket === "Regular" ? "text-green-800" : item.jenisTicket === "VIP" ? "text-blue-800" : item.jenisTicket === "VVIP" ? "text-purple-800" : "text-gray-700"}`}>
-                      {item.jenisTicket === "Regular" ? "Rp 50.000" : 
-                       item.jenisTicket === "VIP" ? "Rp 250.000" : 
-                       item.jenisTicket === "VVIP" ? "Rp 500.000" : "Rp 0"}
-                    </p>
-                    <p className="text-base font-medium text-gray-700">{item.jumlahTicket} Tiket</p>
-                    <p className="text-base font-semibold mt-1 text-gray-800">{item.totalHarga}</p>
-                  </div>
-                </div>
-
-                {/* Bagian Kanan - Aksi Hapus */}
-                <div className="md:w-52 bg-gray-50 rounded-lg p-3 flex items-center justify-center"> {/* Diubah dari md:w-60 menjadi md:w-52 */}
-                  <button 
-                    onClick={() => handleDelete(item.id)}
-                    className="p-2 text-red-600 hover:bg-red-100 hover:text-red-800 rounded-full transition-colors" 
-                    title="Hapus"
-                  >
-                    <Trash2 size={20} />
-                  </button>
                 </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Rekap Data Penjualan */}
+            <div className="px-4 md:px-8 pb-8">
+              <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">Rekap Data Penjualan Offline</h2>
+                
+                {/* Search dan Refresh */}
+                <div className="flex flex-wrap justify-between items-center text-black mb-4 gap-2">
+                  <div className="relative w-full md:w-auto">
+                    <input
+                      type="text"
+                      placeholder="Cari data..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                  
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <button
+                      onClick={handleRefresh}
+                      className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-900 text-sm md:text-base"
+                    >
+                      <RefreshCw className={`h-4 w-4 md:h-5 md:w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      <span>Refresh</span>
+                    </button>
+
+                    {/* Total Tiket */}
+                    <div className="px-3 md:px-4 py-1.5 md:py-2 text-gray-600 font-medium text-sm md:text-base">
+                      Total: {filteredData.length} tiket
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Card Data */}
+                <div className="space-y-3 md:space-y-4">
+                  {currentItems.map((item) => (
+                    <div key={item.id} className="flex flex-row gap-2"> 
+                      {/* Bagian Kiri - Informasi Utama */}
+                      <div className="flex-1 bg-gray-50 rounded-lg p-2 md:p-4 flex justify-between items-center">
+                        {/* Info Pemesan */}
+                        <div>
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <p className="font-mono text-[10px] md:text-sm text-gray-600">{formatTanggal(item.tanggalPemesanan)}</p>
+                            <span className={"text-[10px] md:text-xs font-semibold px-1 md:px-2 py-0.5 rounded-md " + getTipeClass(item.jenisTicket)}>
+                              {item.jenisTicket}
+                            </span>
+                          </div>
+                          <div className="mt-0.5">
+                            <p className="text-sm md:text-xl font-bold text-gray-900">{item.nama}</p>
+                            <p className="text-[10px] md:text-sm text-gray-500">{item.email}</p>
+                            <p className="text-[10px] md:text-sm text-gray-500">{item.noWa}</p>
+                          </div>
+                        </div>
+                
+                        {/* Info Tiket dan Pembayaran */}
+                        <div className="text-right">
+                          <p className={`text-xs md:text-base font-medium ${item.jenisTicket === "Regular" ? "text-green-800" : item.jenisTicket === "VIP" ? "text-blue-800" : item.jenisTicket === "VVIP" ? "text-purple-800" : "text-gray-700"}`}>
+                            {item.jenisTicket === "Regular" ? "Rp 50.000" : 
+                             item.jenisTicket === "VIP" ? "Rp 250.000" : 
+                             item.jenisTicket === "VVIP" ? "Rp 500.000" : "Rp 0"}
+                          </p>
+                          <p className="text-xs md:text-base font-medium text-gray-700">{item.jumlahTicket} Tiket</p>
+                          <p className="text-xs md:text-base font-semibold mt-0.5 md:mt-1 text-gray-800">{item.totalHarga}</p>
+                        </div>
+                      </div>
+                
+                      {/* Bagian Kanan - Aksi Hapus */}
+                      <div className="w-12 md:w-40 bg-gray-50 rounded-lg p-1 md:p-2 flex justify-center items-center">
+                        <button 
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1 md:p-1.5 text-red-600 hover:bg-red-100 hover:text-red-800 rounded-full transition-colors" 
+                          title="Hapus"
+                        >
+                          <Trash2 size={isMobile ? 14 : 20} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Tampilkan pesan jika tidak ada data */}
+                {currentItems.length === 0 && (
+                  <div className="text-center py-6 md:py-8">
+                    <p className="text-gray-500 font-medium text-sm md:text-base">Tidak ada data penjualan</p>
+                    <p className="text-gray-400 text-xs md:text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
+                  </div>
+                )}
+                
+                {/* Paginasi */}
+                {totalPages > 1 && (
+                  <div className="flex justify-between items-center py-2 md:py-4 mt-2 md:mt-4 px-1 md:px-2">
+                    <span className="text-xs md:text-sm text-gray-600">
+                      Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+                    </span>
+                    <div className="flex items-center gap-0.5 md:gap-1">
+                      <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className={`px-1.5 md:px-3 py-0.5 md:py-1 text-xs md:text-sm rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                      >
+                        <ChevronLeft className="h-3 w-3 md:h-4 md:w-4 mr-0.5 md:mr-1" />
+                        Prev
+                      </button>
+                      
+                      <button 
+                        className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center bg-blue-500 text-white text-xs md:text-sm"
+                      >
+                        {currentPage}
+                      </button>
+                      
+                      <button 
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className={`px-1.5 md:px-3 py-0.5 md:py-1 text-xs md:text-sm rounded-full border border-gray-300 ${currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
+                      >
+                        Next
+                        <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-0.5 md:ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          
-          {/* Tampilkan pesan jika tidak ada data */}
-          {currentItems.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500 font-medium">Tidak ada data penjualan</p>
-              <p className="text-gray-400 text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
-            </div>
-          )}
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center py-4 mt-4 px-2">
-              <span className="text-sm text-gray-600">
-                Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button 
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-200'}`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-full border border-gray-300 ${currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} font-semibold flex items-center`}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );}

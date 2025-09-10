@@ -1,7 +1,7 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaPlus, FaTimes, FaSave, FaInstagram, FaTiktok } from "react-icons/fa";
-import { Edit, Trash2, Calendar, MapPin, Clock, DollarSign, Link, FileText, Image } from "lucide-react";
+import { Edit, Trash2, Calendar, MapPin, Clock, DollarSign, Link, FileText, Image, Menu } from "lucide-react";
 import Sidebar2 from "../../../../components/Sidebar2";
 
 export default function Page() {
@@ -33,6 +33,23 @@ export default function Page() {
   
   const [posterPreview, setPosterPreview] = useState("");
   const fileInputRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const adminName = "Panitia";
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+  const toggleMobileSidebar = () => {
+    setShowMobileSidebar(!showMobileSidebar);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -67,264 +84,293 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <Sidebar2 adminName="Panitia" />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Setup Event</h1>
-            <p className="text-gray-500">Konfigurasi informasi dasar event</p>
-          </div>
-        </div>
-
-        {/* Form Setup Event */}
-        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nama Event */}
-            <div>
-              <label className="block font-medium mb-2 text-gray-700">Nama Event</label>
-              <input
-                type="text"
-                name="nama"
-                value={eventData.nama}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Masukkan nama event"
-                required
-              />
+      {/* Sidebar untuk desktop */}
+      <div className={`${isMobile ? 'hidden' : 'block'}`}>
+        <Sidebar2 
+          adminName={adminName} 
+          showMobileSidebar={showMobileSidebar} 
+          setShowMobileSidebar={setShowMobileSidebar} 
+        />
+      </div>
+      
+      {/* Konten utama */}
+      <div className="flex-1">
+        {/* Header Mobile */}
+        {isMobile && (
+          <header className="sticky top-0 bg-white shadow-md z-20 px-4 py-3 flex items-center justify-between">
+            <button 
+              onClick={toggleMobileSidebar}
+              className="p-1 rounded-md text-gray-700 hover:bg-gray-100"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            <div className="text-center">
+              <span className="font-bold text-lg text-black">{adminName}</span>
             </div>
             
-            {/* Poster Event */}
+            <div className="w-6"></div> {/* Spacer untuk menjaga keseimbangan layout */}
+          </header>
+        )}
+        
+        {/* Sidebar Mobile - muncul saat tombol hamburger diklik */}
+        {isMobile && showMobileSidebar && (
+          <div className="fixed inset-0 z-30">
+            <Sidebar2 
+              adminName={adminName} 
+              showMobileSidebar={showMobileSidebar} 
+              setShowMobileSidebar={setShowMobileSidebar} 
+            />
+          </div>
+        )}
+        
+        {/* Hapus overlay berikut karena sudah ada di dalam komponen Sidebar2 */}
+        {/* {isMobile && showMobileSidebar && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30" 
+            onClick={toggleMobileSidebar}
+          ></div>
+        )} */}
+
+        <main className="p-4 md:p-8 z-10">
+          <div className="flex justify-between items-center mb-6 md:mb-8">
             <div>
-              <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-                <Image className="h-5 w-5 text-gray-600" /> Poster Event
-              </label>
-              <div 
-                className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-32 w-full md:w-1/2 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors relative overflow-hidden"
-                onClick={() => {
-                  if (fileInputRef.current) {
-                    (fileInputRef.current as HTMLInputElement).click();
-                  }
-                }}
-              >
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-                
-                {posterPreview ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <img 
-                      src={posterPreview} 
-                      alt="Preview poster" 
-                      className="h-full w-full object-contain" 
-                    />
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Setup Event</h1>
+              <p className="text-gray-500">Konfigurasi informasi dasar event</p>
+            </div>
+          </div>
+
+          {/* Form Setup Event */}
+          <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 hover:shadow-xl transition-shadow duration-300">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Nama Event */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nama Event</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="nama"
+                    value={eventData.nama}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    placeholder="Masukkan nama event"
+                  />
+                </div>
+              </div>
+
+              {/* File */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                <div className="mt-1 flex items-center">
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 flex items-center gap-2"
+                    onClick={() => (fileInputRef.current as any)?.click()}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Pilih File
+                  </button>
+                  <span className="ml-3 text-sm text-gray-500">
+                    {eventData.poster ? eventData.poster.name : "Belum ada file dipilih"}
+                  </span>
+                  {eventData.poster && (
                     <button
                       type="button"
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors z-10"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Mencegah event click menyebar ke parent
+                      onClick={() => {
                         setPosterPreview("");
-                        setEventData({...eventData, poster: null});
-                        if (fileInputRef.current) {
-                          (fileInputRef.current as HTMLInputElement).value = "";
-                        }
+                        setEventData({ ...eventData, poster: null });
                       }}
+                      className="ml-2 text-red-500 hover:text-red-700"
                     >
                       <FaTimes className="h-4 w-4" />
                     </button>
-                  </div>
-                ) : (
-                  <>
-                    <Image className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-gray-500 text-center text-sm">Klik untuk upload poster</p>
-                    <p className="text-xs text-gray-400 mt-1">Format: JPG, PNG, WEBP</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Tanggal, Waktu dan Lokasi */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block font-medium mb-2 text-gray-700">Tanggal Event</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                  </div>
+                  )}
                   <input
-                    type="date"
-                    name="tanggal"
-                    value={eventData.tanggal}
-                    onChange={handleChange}
-                    className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    required
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="*/*"
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  PNG, JPG Max 5MB
+                </p>
               </div>
 
-              <div>
-                <label className="block font-medium mb-2 text-gray-700">Jam Mulai</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Clock className="h-5 w-5 text-gray-400" />
+              {/* Tanggal dan Waktu Event */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Event</label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="tanggal"
+                      value={eventData.tanggal}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Calendar className="h-5 w-5 text-gray-400" />
+                    </div>
                   </div>
-                  <input
-                    type="time"
-                    name="waktu"
-                    value={eventData.waktu}
-                    onChange={handleChange}
-                    className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2 text-gray-700">Harga Tiket Start From</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 font-medium">Rp</span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
+                  <div className="relative">
+                    <input
+                      type="time"
+                      name="waktu"
+                      value={eventData.waktu}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Clock className="h-5 w-5 text-gray-400" />
+                    </div>
                   </div>
-                  <input
-                    type="number"
-                    name="hargaStart"
-                    value={eventData.hargaStart}
-                    onChange={handleChange}
-                    className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    placeholder="Contoh: 50000"
-                    required
-                  />
                 </div>
               </div>
-            </div>
 
-            {/* Lokasi */}
-            <div>
-              <label className="block font-medium mb-2 text-gray-700">Lokasi Event</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="lokasi"
-                  value={eventData.lokasi}
-                  onChange={handleChange}
-                  className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="Masukkan lokasi event"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Media Sosial */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-                  <FaInstagram className="text-pink-600" /> Link Instagram
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Link className="h-5 w-5 text-gray-400" />
+              {/* Lokasi dan Harga */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Lokasi Event</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="lokasi"
+                      value={eventData.lokasi}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="Masukkan lokasi event"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <MapPin className="h-5 w-5 text-gray-400" />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    name="instagram"
-                    value={eventData.instagram}
-                    onChange={handleChange}
-                    className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    placeholder="https://instagram.com/username"
-                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-                  <FaTiktok className="text-black" /> Link TikTok
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Link className="h-5 w-5 text-gray-400" />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Harga Tiket Awal</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="hargaStart"
+                      value={eventData.hargaStart}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="Contoh: 50000"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <DollarSign className="h-5 w-5 text-gray-400" />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    name="tiktok"
-                    value={eventData.tiktok}
-                    onChange={handleChange}
-                    className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    placeholder="https://tiktok.com/@username"
-                  />
                 </div>
               </div>
-            </div>
 
-            {/* Deskripsi Event */}
-            <div>
-              <label className="block font-medium mb-2 text-gray-700">Deskripsi Event</label>
-              <textarea
-                name="deskripsi"
-                value={eventData.deskripsi}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Masukkan deskripsi event"
-                rows={4}
-              />
-            </div>
+              {/* Media Sosial */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="instagram"
+                      value={eventData.instagram}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="@username"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaInstagram className="h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">TikTok</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="tiktok"
+                      value={eventData.tiktok}
+                      onChange={handleChange}
+                      className="w-full pl-10 border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="@username"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaTiktok className="h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            {/* Syarat dan Ketentuan */}
-            <div>
-              <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-gray-600" /> Syarat dan Ketentuan
-              </label>
-              <textarea
-                name="syaratKetentuan"
-                value={eventData.syaratKetentuan}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Masukkan syarat dan ketentuan event"
-                rows={6}
-              />
-            </div>
+              {/* Deskripsi Event */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Event</label>
+                <div className="relative">
+                  <textarea
+                    name="deskripsi"
+                    value={eventData.deskripsi}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    placeholder="Masukkan deskripsi event"
+                  ></textarea>
+                </div>
+              </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <FaSave className="inline mr-2" />
-                Simpan
-              </button>
-              <button
-                type="button"
-                className="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-                onClick={() => {
-                  setEventData({
-                    nama: "",
-                    tanggal: "",
-                    waktu: "",
-                    lokasi: "",
-                    hargaStart: "",
-                    deskripsi: "",
-                    instagram: "",
-                    tiktok: "",
-                    syaratKetentuan: "",
-                    poster: null
-                  });
-                  setPosterPreview("");
-                  if (fileInputRef.current) {
-                    (fileInputRef.current as HTMLInputElement).value = "";
-                  }
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          </form>
-        </div>
-      </main>
+              {/* Syarat dan Ketentuan */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Syarat & Ketentuan</label>
+                <div className="relative">
+                  <textarea
+                    name="syaratKetentuan"
+                    value={eventData.syaratKetentuan}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    placeholder="Masukkan syarat dan ketentuan event"
+                  ></textarea>
+                </div>
+              </div>
+
+              {/* Tombol Submit */}
+              <div className="flex flex-wrap gap-4">
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <FaSave className="h-4 w-4" />
+                  Simpan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEventData({
+                      nama: "",
+                      tanggal: "",
+                      waktu: "",
+                      lokasi: "",
+                      hargaStart: "",
+                      deskripsi: "",
+                      instagram: "",
+                      tiktok: "",
+                      syaratKetentuan: "",
+                      poster: null
+                    });
+                    setPosterPreview("");
+                  }}
+                  className="px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
+                >
+                  <FaTimes className="h-4 w-4" />
+                  Reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
